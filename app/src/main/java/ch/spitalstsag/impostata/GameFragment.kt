@@ -25,11 +25,11 @@ class GameFragment : Fragment() {
     private lateinit var votingLayout: ViewGroup
     private lateinit var resultLayout: ViewGroup
 
-    private  var selectedPlayerCount = 0
+    private  var selectedPlayerCount = 3
     private lateinit var undercoverCountText: TextView
     private lateinit var ImpostorCountText: TextView
 
-    private lateinit var btnAddNames: Button
+
     private lateinit var btnStartGame: Button
 
     private lateinit var nameInputsContainer: LinearLayout
@@ -94,6 +94,7 @@ class GameFragment : Fragment() {
                 playerCountLabel.text = "$value Spieler"
                 selectedPlayerCount = value
                 updateCivilianCount()
+                addNameInputs()
             }
 
 
@@ -104,8 +105,6 @@ class GameFragment : Fragment() {
         undercoverCountText = view.findViewById(R.id.undercoverCountText)
         ImpostorCountText = view.findViewById(R.id.ImpostorCountText)
 
-
-        btnAddNames = view.findViewById(R.id.btnAddNames)
         btnStartGame = view.findViewById(R.id.btnStartGame)
 
         nameInputsContainer = view.findViewById(R.id.nameInputsContainer)
@@ -143,7 +142,6 @@ class GameFragment : Fragment() {
         }
 
 
-        btnAddNames.setOnClickListener { addNameInputs() }
         btnStartGame.setOnClickListener { startGame() }
         btnShowWord.setOnClickListener { showWord() }
         btnNextPlayer.setOnClickListener { nextPlayer() }
@@ -156,14 +154,14 @@ class GameFragment : Fragment() {
 
         btnImpostorPlus.setOnClickListener { changeRoleCount(ImpostorCountText, +1) }
         btnImpostorMinus.setOnClickListener { changeRoleCount(ImpostorCountText, -1) }
-
+        groupContainer.setOnClickListener { removeGroupView() }
         btnSelectGroup.setOnClickListener {
             val intent = Intent(requireContext(), GroupActivity::class.java)
             startActivityForResult(intent, REQUEST_CODE_SELECT_GROUP)
         }
 
 
-
+        addNameInputs()
         return view
     }
 
@@ -283,7 +281,7 @@ class GameFragment : Fragment() {
         }
 
         if (gameLogic.isGameOver()) {
-            voteResultText.append("\nDas Spiel ist beendet, die Impostor wurden gefunden!")
+            voteResultText.append("\nDas Spiel ist beendet")
             btnContinueVoting.visibility = View.GONE
             btnRestartGame.visibility = View.VISIBLE
         }
@@ -313,7 +311,12 @@ class GameFragment : Fragment() {
 
         ImpostorGuessInput.setText("")
 
-        nameInputsContainer.removeAllViews()
+    }
+    private fun removeGroupView() {
+        groupContainer.removeAllViews()
+        playerCountLabel.visibility = View.VISIBLE
+        playerCountSlider.visibility = View.VISIBLE
+        addNameInputs()
     }
 
 
@@ -350,7 +353,7 @@ class GameFragment : Fragment() {
             groupView.findViewById<ImageButton>(R.id.editGroupBtn).visibility = View.GONE
             playerCountLabel.visibility = View.GONE
             playerCountSlider.visibility = View.GONE
-            btnAddNames.visibility = View.GONE
+
 
             groupContainer.addView(groupView)
 

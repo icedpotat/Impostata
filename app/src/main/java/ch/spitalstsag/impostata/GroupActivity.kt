@@ -3,7 +3,6 @@ package ch.spitalstsag.impostata
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
