@@ -21,10 +21,9 @@ class GameFragment : Fragment() {
     private lateinit var votingLayout: ViewGroup
     private lateinit var resultLayout: ViewGroup
 
-    private lateinit var playerCountInput: EditText
     private  var selectedPlayerCount = 0
-    private lateinit var undercoverCountInput: EditText
-    private lateinit var impostorCountInput: EditText
+    private lateinit var undercoverCountText: TextView
+    private lateinit var impostorCountText: TextView
 
     private lateinit var btnAddNames: Button
     private lateinit var btnStartGame: Button
@@ -39,6 +38,8 @@ class GameFragment : Fragment() {
 
     private lateinit var votingButtonsContainer: LinearLayout
 
+    private lateinit var btnSelectGroup: Button
+
     private lateinit var voteResultText: TextView
     private lateinit var impostorGuessLayout: ViewGroup
     private lateinit var impostorGuessInput: EditText
@@ -47,6 +48,13 @@ class GameFragment : Fragment() {
     private lateinit var btnRestartGame: Button
 
     private lateinit var importButton: Button
+
+    private lateinit var btnUndercoverPlus: Button
+    private lateinit var btnUndercoverMinus: Button
+    private lateinit var btnImpostorPlus: Button
+    private lateinit var btnImpostorMinus: Button
+    private lateinit var civilianCountText: TextView
+
 
     private var currentPlayerIndex = 0
 
@@ -70,18 +78,20 @@ class GameFragment : Fragment() {
 
         playerCountSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                val value = progress + 3 // because slider starts at 0 = 3 players
-                playerCountLabel.text = value.toString()
-                // Store the value somewhere if needed
+                val value = progress + 3
+                playerCountLabel.text = "$value Spieler"
+                selectedPlayerCount = value
+                updateCivilianCount()
             }
+
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
         selectedPlayerCount = playerCountSlider.progress + 3
+        undercoverCountText = view.findViewById(R.id.undercoverCountText)
+        impostorCountText = view.findViewById(R.id.impostorCountText)
 
-        undercoverCountInput = view.findViewById(R.id.undercoverCountInput)
-        impostorCountInput = view.findViewById(R.id.impostorCountInput)
 
         btnAddNames = view.findViewById(R.id.btnAddNames)
         btnStartGame = view.findViewById(R.id.btnStartGame)
@@ -103,6 +113,13 @@ class GameFragment : Fragment() {
         btnContinueVoting = view.findViewById(R.id.btnContinueVoting)
         btnRestartGame = view.findViewById(R.id.btnRestartGame)
 
+        btnUndercoverPlus = view.findViewById(R.id.btnUndercoverPlus)
+        btnUndercoverMinus = view.findViewById(R.id.btnUndercoverMinus)
+        btnImpostorPlus = view.findViewById(R.id.btnImpostorPlus)
+        btnImpostorMinus = view.findViewById(R.id.btnImpostorMinus)
+        civilianCountText = view.findViewById(R.id.civilianCountText)
+
+
         importButton = view.findViewById(R.id.importWordsButton)
 
         importButton.setOnClickListener {
@@ -121,15 +138,21 @@ class GameFragment : Fragment() {
         btnContinueVoting.setOnClickListener { startVoting() }
         btnRestartGame.setOnClickListener { restartGame() }
 
+        btnUndercoverPlus.setOnClickListener { changeRoleCount(undercoverCountText, +1) }
+        btnUndercoverMinus.setOnClickListener { changeRoleCount(undercoverCountText, -1) }
+
+        btnImpostorPlus.setOnClickListener { changeRoleCount(impostorCountText, +1) }
+        btnImpostorMinus.setOnClickListener { changeRoleCount(impostorCountText, -1) }
+
+
         return view
     }
 
+
+
     private fun addNameInputs() {
         nameInputsContainer.removeAllViews()
-
-        val count = selectedPlayerCount
-
-        for (i in 0 until count) {
+        for (i in 0 until selectedPlayerCount) {
             val et = EditText(requireContext())
             et.hint = "Spieler ${i + 1} Name"
             et.inputType = InputType.TYPE_CLASS_TEXT
@@ -144,9 +167,10 @@ class GameFragment : Fragment() {
             .filterIsInstance<EditText>()
             .map { it.text.toString() }
             .toList()
-//Arsch?
-        val undercoverCount = undercoverCountInput.text.toString().toIntOrNull() ?: 0
-        val impostorCount = impostorCountInput.text.toString().toIntOrNull() ?: 0
+
+        val undercoverCount = undercoverCountText.text.toString().toIntOrNull() ?: 0
+        val impostorCount = impostorCountText.text.toString().toIntOrNull() ?: 0
+
 
         if (!gameLogic.setupGame(playerNames, undercoverCount, impostorCount)) {
             Toast.makeText(requireContext(), "Zu viele Undercover/Impostor für diese Spieleranzahl.", Toast.LENGTH_SHORT).show()
@@ -162,6 +186,22 @@ class GameFragment : Fragment() {
         currentPlayerIndex = 0
         updateCurrentPlayer()
     }
+
+    private fun changeRoleCount(textView: TextView, delta: Int) {
+        val current = textView.text.toString().toIntOrNull() ?: 0
+        val updated = (current + delta).coerceAtLeast(0)
+        textView.text = updated.toString()
+        updateCivilianCount()
+    }
+
+    private fun updateCivilianCount() {
+        val total = selectedPlayerCount
+        val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
+        val impostor = impostorCountText.text.toString().toIntOrNull() ?: 0
+        val civilian = total - undercover - impostor
+        civilianCountText.text = "Zivile: ${civilian.coerceAtLeast(0)}"
+    }
+
 
     private fun updateCurrentPlayer() {
         if (currentPlayerIndex < gameLogic.players.size) {
@@ -250,9 +290,8 @@ class GameFragment : Fragment() {
         votingLayout.visibility = View.GONE
         resultLayout.visibility = View.GONE
 
-        playerCountInput.text.clear()
-        undercoverCountInput.text.clear()
-        impostorCountInput.text.clear()
+        impostorGuessInput.setText("")
+
         nameInputsContainer.removeAllViews()
     }
 
@@ -273,6 +312,6 @@ class GameFragment : Fragment() {
                 }
             }
         }
+        Toast.makeText(requireContext(), "Wörter erfolgreich importiert.", Toast.LENGTH_SHORT).show()
     }
-
 }

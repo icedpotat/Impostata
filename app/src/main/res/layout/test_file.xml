@@ -22,30 +22,15 @@
             android:layout_height="wrap_content"
             android:visibility="visible">
 
-            <LinearLayout
+            <TextView
+                android:text="Impostata Spiel"
+                android:textSize="24sp"
+                android:textColor="#FFFFFF"
+                android:gravity="center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical|end">
+                android:padding="8dp" />
 
-                <TextView
-                    android:text="Impostata Spiel"
-                    android:textSize="24sp"
-                    android:textColor="#FFFFFF"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:padding="8dp" />
-
-                <Button
-                    android:id="@+id/btnSelectGroup"
-                    android:text="Gruppen"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <!-- Slider Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -53,15 +38,31 @@
                 android:layout_marginTop="8dp"
                 android:gravity="center_horizontal">
 
-                <TextView
-                    android:id="@+id/playerCountLabel"
-                    android:layout_width="match_parent"
+                <!-- Icon and current value -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="3 Spieler"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18sp"
-                    android:layout_marginBottom="4dp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="4dp">
 
+                    <TextView
+                        android:id="@+id/playerCountLabel"
+                        android:text="3"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_height="match_parent"
+                        android:layout_width="match_parent"/>
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_player"
+                        android:contentDescription="Player Icon" />
+                </LinearLayout>
+
+                <!-- Slider -->
                 <SeekBar
                     android:id="@+id/playerCountSlider"
                     android:layout_width="match_parent"
@@ -72,95 +73,58 @@
                     android:progressTint="#FFFFFF" />
             </LinearLayout>
 
-            <!-- Role Count Section -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="12dp">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
 
-                <!-- Undercover -->
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <EditText
+                    android:id="@+id/undercoverCountInput"
+                    android:hint="Anzahl Undercover"
+                    android:inputType="number"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
-
-                    <Button
-                        android:id="@+id/btnUndercoverMinus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="−" />
-
-                    <TextView
-                        android:id="@+id/undercoverCountText"
-                        android:layout_width="40dp"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="0"
-                        android:textSize="18sp"
-                        android:textColor="#FFFFFF" />
-
-                    <Button
-                        android:id="@+id/btnUndercoverPlus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="+" />
-
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:src="@drawable/ic_undercover"
-                        android:contentDescription="Undercover Icon"
-                        android:layout_marginStart="8dp" />
-                </LinearLayout>
-
-                <!-- Impostor -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <Button
-                        android:id="@+id/btnImpostorMinus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="−" />
-
-                    <TextView
-                        android:id="@+id/impostorCountText"
-                        android:layout_width="40dp"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="0"
-                        android:textSize="18sp"
-                        android:textColor="#FFFFFF" />
-
-                    <Button
-                        android:id="@+id/btnImpostorPlus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="+" />
-
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:src="@drawable/ic_impostor"
-                        android:contentDescription="Impostor Icon"
-                        android:layout_marginStart="8dp" />
-                </LinearLayout>
-
-                <!-- Civilians -->
-                <TextView
-                    android:id="@+id/civilianCountText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Zivile: 0"
+                    android:backgroundTint="#FFFFFF"
                     android:textColor="#FFFFFF"
-                    android:layout_marginTop="8dp"
-                    android:textSize="16sp" />
+                    android:textColorHint="#AAAAAA" />
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_undercover"
+                    android:contentDescription="Undercover Icon"
+                    android:layout_marginEnd="8dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/impostorCountInput"
+                    android:hint="Anzahl impostor"
+                    android:inputType="number"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#FFFFFF"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#AAAAAA" />
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_impostor"
+                    android:contentDescription="Impostor Icon"
+                    android:layout_marginEnd="8dp"
+                    />
             </LinearLayout>
 
             <LinearLayout
@@ -182,16 +146,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone" />
-
             <Button
                 android:id="@+id/importWordsButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Wörter importieren" />
-        </LinearLayout>
 
-        <!-- Game Phase -->
-        <!-- (Unchanged content remains below) -->
+        </LinearLayout>
 
         <!-- Game Phase -->
         <LinearLayout

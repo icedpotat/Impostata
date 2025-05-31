@@ -102,7 +102,7 @@ object GameLogic {
     }
 
     fun isGameOver(): Boolean {
-        return remainingimpostors <= startImpostors
+        return remainingimpostors <= 1
     }
 
     fun resetGame() {
