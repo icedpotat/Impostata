@@ -1,0 +1,39 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Silhouette (head shape) -->
+    <path
+        android:fillColor="#D3D3D3"
+        android:pathData="M54,27
+                          c-20,0 -34,14 -34,34
+                          s14,34 34,34
+                          34,-14 34,-34
+                          -14,-34 -34,-34
+                          z" />
+
+    <!-- Left Lens -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:pathData="M18,54
+                          a12,12 0 1,0 24,0
+                          a12,12 0 1,0 -24,0" />
+
+    <!-- Right Lens -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:pathData="M66,54
+                          a12,12 0 1,0 24,0
+                          a12,12 0 1,0 -24,0" />
+
+    <!-- Bridge -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:pathData="M42,54h24" />
+</vector>
