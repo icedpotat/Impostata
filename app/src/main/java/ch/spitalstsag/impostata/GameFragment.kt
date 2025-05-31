@@ -50,6 +50,8 @@ class GameFragment : Fragment() {
     private lateinit var btnConfirmGuess: Button
     private lateinit var btnContinueVoting: Button
     private lateinit var btnRestartGame: Button
+    private lateinit var playerCountLabel: TextView
+    private lateinit var playerCountSlider: SeekBar
 
     private lateinit var importButton: Button
 
@@ -83,8 +85,8 @@ class GameFragment : Fragment() {
         votingLayout = view.findViewById(R.id.votingLayout)
         resultLayout = view.findViewById(R.id.resultLayout)
 
-        val playerCountSlider = view.findViewById<SeekBar>(R.id.playerCountSlider)
-        val playerCountLabel = view.findViewById<TextView>(R.id.playerCountLabel)
+        playerCountSlider = view.findViewById<SeekBar>(R.id.playerCountSlider)
+        playerCountLabel = view.findViewById<TextView>(R.id.playerCountLabel)
 
         playerCountSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -346,9 +348,24 @@ class GameFragment : Fragment() {
             groupView.findViewById<TextView>(R.id.groupNameText).text = groupName
             groupView.findViewById<TextView>(R.id.playerListText).text = playerNames.toString()
             groupView.findViewById<ImageButton>(R.id.editGroupBtn).visibility = View.GONE
-
+            playerCountLabel.visibility = View.GONE
+            playerCountSlider.visibility = View.GONE
+            btnAddNames.visibility = View.GONE
 
             groupContainer.addView(groupView)
+
+
+            selectedPlayerCount = playerNames?.size ?: 0
+            playerCountLabel.text = "$selectedPlayerCount Spieler"
+            nameInputsContainer.removeAllViews()
+            playerNames?.forEach {
+                val et = EditText(requireContext())
+                et.setText(it)
+                et.inputType = InputType.TYPE_CLASS_TEXT
+                nameInputsContainer.addView(et)
+            }
+
+            btnStartGame.visibility = View.VISIBLE
         }
     }
 }
