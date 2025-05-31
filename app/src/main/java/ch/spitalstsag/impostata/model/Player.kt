@@ -7,5 +7,5 @@ data class Player(
 )
 
 enum class Role {
-    CREW, UNDERCOVER, impostor, EJECTED
+    CREW, UNDERCOVER, IMPOSTOR, EJECTED
 }

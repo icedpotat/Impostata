@@ -1,6 +1,5 @@
 package ch.spitalstsag.impostata
 
-import android.content.Intent
 import ch.spitalstsag.impostata.model.Player
 import ch.spitalstsag.impostata.model.Role
 import ch.spitalstsag.impostata.model.WordPair
@@ -19,17 +18,17 @@ object GameLogic {
 
     var players = mutableListOf<Player>()
     var selectedPair: WordPair? = null
-    var remainingimpostors = 0
+    var remainingImpostors = 0
     var startImpostors = 0
     var gameEnded = false
 
     fun setupGame(
         playerNames: List<String>,
         undercoverCount: Int,
-        impostorCount: Int
+        ImpostorCount: Int
     ): Boolean {
         val playerCount = playerNames.size
-        if (undercoverCount + impostorCount >= playerCount) {
+        if (undercoverCount + ImpostorCount >= playerCount) {
             return false
         }
 
@@ -50,9 +49,9 @@ object GameLogic {
         players.forEach { it.role = Role.CREW }
 
         assignRole(Role.UNDERCOVER, undercoverCount)
-        assignRole(Role.impostor, impostorCount)
-        remainingimpostors = impostorCount
-        startImpostors = impostorCount
+        assignRole(Role.IMPOSTOR, ImpostorCount)
+        remainingImpostors = ImpostorCount
+        startImpostors = ImpostorCount
         gameEnded = false
         return true
     }
@@ -80,7 +79,7 @@ object GameLogic {
         return when(role) {
             Role.CREW -> selectedPair?.crewWord
             Role.UNDERCOVER -> selectedPair?.undercoverWord
-            Role.impostor -> "Du bist der Impostor. Finde heraus, welches Wort die anderen meinen!"
+            Role.IMPOSTOR -> "Du bist der Impostor. Finde heraus, welches Wort die anderen meinen!"
             else -> null
         }
     }
@@ -90,26 +89,26 @@ object GameLogic {
             val role = players[index].role
             players[index].role = Role.EJECTED
             players[index].isEjected = true
-            if (role == Role.impostor) {
-                remainingimpostors--
+            if (role == Role.IMPOSTOR) {
+                remainingImpostors--
             }
         }
     }
 
-    fun checkimpostorGuess(guess: String): Boolean {
+    fun checkImpostorGuess(guess: String): Boolean {
         val correctWord = selectedPair?.crewWord?.lowercase()
         return guess.lowercase() == correctWord
     }
 
     fun isGameOver(): Boolean {
-        return remainingimpostors <= 1
+        return remainingImpostors <= 1
     }
 
     fun resetGame() {
         players.clear()
         wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
         selectedPair = null
-        remainingimpostors = 0
+        remainingImpostors = 0
         gameEnded = false
     }
 

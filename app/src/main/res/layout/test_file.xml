@@ -108,8 +108,8 @@
                 android:layout_marginTop="8dp">
 
                 <EditText
-                    android:id="@+id/impostorCountInput"
-                    android:hint="Anzahl impostor"
+                    android:id="@+id/ImpostorCountInput"
+                    android:hint="Anzahl Impostor"
                     android:inputType="number"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -209,7 +209,7 @@
             android:paddingTop="16dp">
 
             <TextView
-                android:text="Stimmt ab, wer der impostor ist!"
+                android:text="Stimmt ab, wer der Impostor ist!"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp"
                 android:layout_width="match_parent"
@@ -240,7 +240,7 @@
                 android:padding="8dp" />
 
             <LinearLayout
-                android:id="@+id/impostorGuessLayout"
+                android:id="@+id/ImpostorGuessLayout"
                 android:orientation="vertical"
                 android:visibility="gone"
                 android:layout_width="match_parent"
@@ -248,13 +248,13 @@
                 android:padding="8dp">
 
                 <TextView
-                    android:text="impostor, rate das Crew-Wort:"
+                    android:text="Impostor, rate das Crew-Wort:"
                     android:textColor="#FFFFFF"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
                 <EditText
-                    android:id="@+id/impostorGuessInput"
+                    android:id="@+id/ImpostorGuessInput"
                     android:hint="Crew-Wort"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
