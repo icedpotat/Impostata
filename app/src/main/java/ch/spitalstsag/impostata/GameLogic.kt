@@ -15,6 +15,7 @@ object GameLogic {
         WordPair("Teller", "Pfanne")
     )
     private var wordPairs = wordPairsMaster.toMutableList()
+    val customWordPairs = mutableListOf<WordPair>()
 
     var players = mutableListOf<Player>()
     var selectedPair: WordPair? = null
@@ -22,37 +23,25 @@ object GameLogic {
     var startImpostors = 0
     var gameEnded = false
 
-    fun setupGame(
-        playerNames: List<String>,
-        undercoverCount: Int,
-        ImpostorCount: Int
-    ): Boolean {
-        val playerCount = playerNames.size
-        if (undercoverCount + ImpostorCount >= playerCount) {
-            return false
-        }
+    fun setupGame(playerNames: List<String>, undercoverCount: Int, impostorCount: Int): Boolean {
+        if (undercoverCount + impostorCount >= playerNames.size) return false
 
-        players.clear()
-        players.addAll(playerNames.mapIndexed { index, name ->
-            val cleanedName = name.trim()
-            Player(if (cleanedName.isNotEmpty()) cleanedName else "Spieler ${index + 1}")
-        })
-
+        players = playerNames.mapIndexed { index, name ->
+            val trimmedName = name.trim()
+            Player(if (trimmedName.isNotEmpty()) trimmedName else "Spieler ${index + 1}")
+        }.toMutableList()
 
         wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
+        selectedPair = wordPairs.removeAt(Random.nextInt(wordPairs.size))
 
-
-        val index = Random.nextInt(wordPairs.size)
-        selectedPair = wordPairs.removeAt(index)
-
-        // Assign roles
         players.forEach { it.role = Role.CREW }
-
         assignRole(Role.UNDERCOVER, undercoverCount)
-        assignRole(Role.IMPOSTOR, ImpostorCount)
-        remainingImpostors = ImpostorCount
-        startImpostors = ImpostorCount
+        assignRole(Role.IMPOSTOR, impostorCount)
+
+        remainingImpostors = impostorCount
+        startImpostors = impostorCount
         gameEnded = false
+
         return true
     }
 
@@ -67,16 +56,10 @@ object GameLogic {
         }
     }
 
-    fun getRoleForPlayer(index: Int): Role? {
-        if (index in players.indices) {
-            return players[index].role
-        }
-        return null
-    }
+    fun getRoleForPlayer(index: Int): Role? = players.getOrNull(index)?.role
 
     fun getWordForPlayer(index: Int): String? {
-        val role = getRoleForPlayer(index) ?: return null
-        return when(role) {
+        return when (getRoleForPlayer(index)) {
             Role.CREW -> selectedPair?.crewWord
             Role.UNDERCOVER -> selectedPair?.undercoverWord
             Role.IMPOSTOR -> "Du bist der Impostor. Finde heraus, welches Wort die anderen meinen!"
@@ -85,24 +68,20 @@ object GameLogic {
     }
 
     fun ejectPlayer(index: Int) {
-        if (index in players.indices) {
-            val role = players[index].role
-            players[index].role = Role.EJECTED
-            players[index].isEjected = true
-            if (role == Role.IMPOSTOR) {
-                remainingImpostors--
+        players.getOrNull(index)?.let {
+            if (!it.isEjected) {
+                if (it.role == Role.IMPOSTOR) remainingImpostors--
+                it.role = Role.EJECTED
+                it.isEjected = true
             }
         }
     }
 
     fun checkImpostorGuess(guess: String): Boolean {
-        val correctWord = selectedPair?.crewWord?.lowercase()
-        return guess.lowercase() == correctWord
+        return guess.trim().lowercase() == selectedPair?.crewWord?.lowercase()
     }
 
-    fun isGameOver(): Boolean {
-        return remainingImpostors <= 1
-    }
+    fun isGameOver(): Boolean = remainingImpostors <= 1
 
     fun resetGame() {
         players.clear()
@@ -112,12 +91,8 @@ object GameLogic {
         gameEnded = false
     }
 
-    val customWordPairs = mutableListOf<WordPair>()
-
     fun addWordPair(crew: String, undercover: String) {
-        customWordPairs.add(WordPair(crew, undercover))
+        customWordPairs.add(WordPair(crew.trim(), undercover.trim()))
         wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
     }
-
-
 }
