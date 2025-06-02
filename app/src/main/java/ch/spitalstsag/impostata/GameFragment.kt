@@ -103,6 +103,33 @@ class GameFragment : Fragment() {
         importButton = view.findViewById(R.id.importWordsButton)
     }
 
+    private fun getRoleCounts(): Triple<Int, Int, Int> {
+        val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
+        val impostor = ImpostorCountText.text.toString().toIntOrNull() ?: 0
+        val civilian = (selectedPlayerCount - undercover - impostor).coerceAtLeast(0)
+        return Triple(undercover, impostor, civilian)
+    }
+
+    private fun updateCivilianCount() {
+        val (_, _, civilian) = getRoleCounts()
+        civilianCountText.text = "Zivile: $civilian"
+    }
+
+    private fun updateRoleButtonsVisibility() {
+        val (undercover, impostor, _) = getRoleCounts()
+        val maxRoles = selectedPlayerCount / 2 + 1
+
+        btnUndercoverPlus.visibility =
+            if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
+        btnImpostorPlus.visibility =
+            if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
+
+        btnUndercoverMinus.visibility =
+            if ((impostor == 0 && undercover == 1) || undercover == 0) View.INVISIBLE else View.VISIBLE
+        btnImpostorMinus.visibility =
+            if ((undercover == 0 && impostor == 1) || impostor == 0) View.INVISIBLE else View.VISIBLE
+    }
+
     private fun setupListeners() {
         playerCountSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -187,8 +214,10 @@ class GameFragment : Fragment() {
         val current = textView.text.toString().toIntOrNull() ?: 0
         val newCount = (current + delta).coerceAtLeast(0)
 
-        val undercover = if (textView == undercoverCountText) newCount else undercoverCountText.text.toString().toIntOrNull() ?: 0
-        val impostor = if (textView == ImpostorCountText) newCount else ImpostorCountText.text.toString().toIntOrNull() ?: 0
+        if (textView == undercoverCountText) undercoverCountText.text = newCount.toString()
+        if (textView == ImpostorCountText) ImpostorCountText.text = newCount.toString()
+
+        val (undercover, impostor, _) = getRoleCounts()
         val maxAllowed = selectedPlayerCount / 2 + 1
 
         if (undercover + impostor > maxAllowed) {
@@ -199,28 +228,6 @@ class GameFragment : Fragment() {
         textView.text = newCount.toString()
         updateCivilianCount()
         updateRoleButtonsVisibility()
-    }
-
-    private fun updateRoleButtonsVisibility() {
-        val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
-        val impostor = ImpostorCountText.text.toString().toIntOrNull() ?: 0
-        val maxRoles = selectedPlayerCount / 2 + 1
-
-        btnUndercoverPlus.visibility = if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
-        btnImpostorPlus.visibility = if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
-
-        btnUndercoverMinus.visibility = if (impostor == 0 && undercover == 1 || undercover == 0) View.INVISIBLE else View.VISIBLE
-        btnImpostorMinus.visibility = if (undercover == 0 && impostor == 1 || impostor == 0) View.INVISIBLE else View.VISIBLE
-    }
-
-
-
-    private fun updateCivilianCount() {
-        val total = selectedPlayerCount
-        val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
-        val impostor = ImpostorCountText.text.toString().toIntOrNull() ?: 0
-        val civilian = total - undercover - impostor
-        civilianCountText.text = "Zivile: ${civilian.coerceAtLeast(0)}"
     }
 
     private fun updateCurrentPlayer() {
