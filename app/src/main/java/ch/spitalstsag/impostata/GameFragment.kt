@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import ch.spitalstsag.impostata.model.Role
 
 class GameFragment : Fragment() {
+    private enum class GamePhase { SETUP, PLAYING, VOTING, RESULT }
 
     private lateinit var gameLogic: GameLogic
 
@@ -103,6 +104,13 @@ class GameFragment : Fragment() {
         importButton = view.findViewById(R.id.importWordsButton)
     }
 
+    private fun setGamePhase(phase: GamePhase) {
+        setupLayout.visibility = if (phase == GamePhase.SETUP) View.VISIBLE else View.GONE
+        gameLayout.visibility = if (phase == GamePhase.PLAYING) View.VISIBLE else View.GONE
+        votingLayout.visibility = if (phase == GamePhase.VOTING) View.VISIBLE else View.GONE
+        resultLayout.visibility = if (phase == GamePhase.RESULT) View.VISIBLE else View.GONE
+    }
+
     private fun getRoleCounts(): Triple<Int, Int, Int> {
         val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
         val impostor = ImpostorCountText.text.toString().toIntOrNull() ?: 0
@@ -119,15 +127,11 @@ class GameFragment : Fragment() {
         val (undercover, impostor, _) = getRoleCounts()
         val maxRoles = selectedPlayerCount / 2 + 1
 
-        btnUndercoverPlus.visibility =
-            if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
-        btnImpostorPlus.visibility =
-            if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
+        btnUndercoverPlus.visibility = if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
+        btnImpostorPlus.visibility = if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
 
-        btnUndercoverMinus.visibility =
-            if ((impostor == 0 && undercover == 1) || undercover == 0) View.INVISIBLE else View.VISIBLE
-        btnImpostorMinus.visibility =
-            if ((undercover == 0 && impostor == 1) || impostor == 0) View.INVISIBLE else View.VISIBLE
+        btnUndercoverMinus.visibility = if ((impostor == 0 && undercover == 1) || undercover == 0) View.INVISIBLE else View.VISIBLE
+        btnImpostorMinus.visibility = if ((undercover == 0 && impostor == 1) || impostor == 0) View.INVISIBLE else View.VISIBLE
     }
 
     private fun setupListeners() {
@@ -198,10 +202,7 @@ class GameFragment : Fragment() {
             return
         }
 
-        setupLayout.visibility = View.GONE
-        gameLayout.visibility = View.VISIBLE
-        votingLayout.visibility = View.GONE
-        resultLayout.visibility = View.GONE
+        setGamePhase(GamePhase.PLAYING)
 
         currentPlayerIndex = 0
         updateCurrentPlayer()
@@ -236,7 +237,6 @@ class GameFragment : Fragment() {
             currentPlayerText.text = "Gerät an: ${player.name}"
             wordDisplayLayout.visibility = View.GONE
         } else {
-            gameLayout.visibility = View.GONE
             startVoting()
         }
     }
@@ -255,8 +255,8 @@ class GameFragment : Fragment() {
     private fun startVoting() {
         if (gameLogic.gameEnded) return
 
-        votingLayout.visibility = View.VISIBLE
-        resultLayout.visibility = View.GONE
+        setGamePhase(GamePhase.VOTING)
+
         votingButtonsContainer.removeAllViews()
 
         gameLogic.players.forEachIndexed { index, player ->
@@ -270,8 +270,8 @@ class GameFragment : Fragment() {
     }
 
     private fun resolveVote(index: Int) {
-        votingLayout.visibility = View.GONE
-        resultLayout.visibility = View.VISIBLE
+        setGamePhase(GamePhase.RESULT)
+
 
         val role = gameLogic.players[index].role
         gameLogic.ejectPlayer(index)
@@ -303,21 +303,18 @@ class GameFragment : Fragment() {
             "Impostor hat richtig geraten! Impostor gewinnen."
 
         } else {
-            "Falsches Wort. Das Spiel geht weiter."
+            "Falsches Wort, u suck lol"
         }
 
         ImpostorGuessLayout.visibility = View.GONE
         btnConfirmGuess.visibility = View.GONE
-        if (!correct) btnContinueVoting.visibility = View.VISIBLE
+        if (!correct && !gameLogic.isGameOver()) btnContinueVoting.visibility = View.VISIBLE
     }
 
     private fun restartGame() {
         gameLogic.resetGame()
         btnRestartGame.visibility = View.GONE
-        setupLayout.visibility = View.VISIBLE
-        gameLayout.visibility = View.GONE
-        votingLayout.visibility = View.GONE
-        resultLayout.visibility = View.GONE
+        setGamePhase(GamePhase.SETUP)
         ImpostorGuessInput.setText("")
     }
 
