@@ -60,6 +60,7 @@
                 android:id="@+id/playerCountLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:text="3 Spieler"
                 android:textColor="@color/pixel_text"
                 android:fontFamily="@font/pixel_font"
@@ -79,6 +80,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:text="Rollen"
                 android:textColor="@color/pixel_yellow"
                 android:fontFamily="@font/pixel_font"
@@ -89,23 +91,33 @@
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:layout_marginTop="8dp">
+                android:gravity="center"
+                android:layout_marginTop="16dp">
 
                 <Button
                     android:id="@+id/btnUndercoverMinus"
-                    android:text="−"
+                    android:text="–"
                     style="@style/PixelButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_width="40dp"
+                    android:layout_height="40dp" />
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_undercover"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="4dp"
+                    android:contentDescription="Undercover Icon" />
 
                 <TextView
                     android:id="@+id/undercoverCountText"
                     android:layout_width="40dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:gravity="center"
                     android:text="0"
                     android:textSize="16sp"
+                    android:lineHeight="16sp"
+                    android:includeFontPadding="false"
                     android:textColor="@color/pixel_text"
                     android:fontFamily="@font/pixel_font" />
 
@@ -113,38 +125,42 @@
                     android:id="@+id/btnUndercoverPlus"
                     android:text="+"
                     style="@style/PixelButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:src="@drawable/ic_undercover"
-                    android:contentDescription="Undercover Icon"
-                    android:layout_marginStart="8dp" />
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="4dp" />
             </LinearLayout>
             <!-- Impostor Controls -->
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
+                android:gravity="center"
                 android:layout_marginTop="4dp">
 
                 <Button
                     android:id="@+id/btnImpostorMinus"
-                    android:text="−"
+                    android:text="–"
                     style="@style/PixelButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"/>
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_impostor"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="4dp"
+                    android:contentDescription="Impostor Icon" />
 
                 <TextView
                     android:id="@+id/ImpostorCountText"
                     android:layout_width="40dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:gravity="center"
                     android:text="1"
                     android:textSize="16sp"
+                    android:lineHeight="16sp"
+                    android:includeFontPadding="false"
                     android:textColor="@color/pixel_text"
                     android:fontFamily="@font/pixel_font" />
 
@@ -152,21 +168,19 @@
                     android:id="@+id/btnImpostorPlus"
                     android:text="+"
                     style="@style/PixelButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="4dp" />
 
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:src="@drawable/ic_impostor"
-                    android:contentDescription="Impostor Icon"
-                    android:layout_marginStart="8dp" />
+
             </LinearLayout>
             <!-- Civilians -->
             <TextView
                 android:id="@+id/civilianCountText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:layout_gravity="center"
                 android:text="Zivile: 0"
                 android:textColor="@color/pixel_text"
                 android:textSize="14sp"
@@ -184,6 +198,7 @@
                 android:id="@+id/btnStartGame"
                 android:text="Spiel starten"
                 style="@style/PixelButton"
+                android:layout_gravity="center"
                 android:layout_marginTop="8dp"
                 android:visibility="gone"
                 android:layout_width="wrap_content"
@@ -193,6 +208,7 @@
                 android:id="@+id/importWordsButton"
                 android:text="Wörter importieren"
                 style="@style/PixelButton"
+                android:layout_gravity="center"
                 android:layout_marginTop="4dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

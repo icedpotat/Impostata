@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.firebase.crashlytics.buildtools)
     implementation("com.google.code.gson:gson:2.11.0")
+    implementation(libs.androidx.ui.test.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

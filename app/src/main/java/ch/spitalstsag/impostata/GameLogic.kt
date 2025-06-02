@@ -1,5 +1,6 @@
 package ch.spitalstsag.impostata
 
+import android.util.Log
 import ch.spitalstsag.impostata.model.Player
 import ch.spitalstsag.impostata.model.Role
 import ch.spitalstsag.impostata.model.WordPair
@@ -23,7 +24,13 @@ object GameLogic {
     var startImpostors = 0
     var gameEnded = false
 
-    fun setupGame(playerNames: List<String>, undercoverCount: Int, impostorCount: Int): Boolean {
+    var isCrewGame = false
+    var isImpostorGame = false
+
+    fun setupGame(playerNames: List<String>, undercoverCount: Int, impostorCountOriginal: Int): Boolean {
+        isCrewGame = false
+        isImpostorGame = false
+        var impostorCount = impostorCountOriginal
         if (undercoverCount + impostorCount >= playerNames.size) return false
 
         players = playerNames.mapIndexed { index, name ->
@@ -31,16 +38,34 @@ object GameLogic {
             Player(if (trimmedName.isNotEmpty()) trimmedName else "Spieler ${index + 1}")
         }.toMutableList()
 
+        val chaosRoll = Random.nextInt(100)
+
+        if (chaosRoll == 1) { // 1% no impostor
+            impostorCount = 0
+            isCrewGame = true
+        }
+
+        if (chaosRoll == 2) { // 1% everyone is impostor
+            players.forEach { it.role = Role.IMPOSTOR }
+            remainingImpostors = players.size
+            startImpostors = players.size
+            gameEnded = false
+            isImpostorGame = true
+            return true
+        }
+
         wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
-        selectedPair = wordPairs.removeAt(Random.nextInt(wordPairs.size))
+        if(!isImpostorGame) selectedPair = wordPairs.removeAt(Random.nextInt(wordPairs.size))
 
         players.forEach { it.role = Role.CREW }
         assignRole(Role.UNDERCOVER, undercoverCount)
         assignRole(Role.IMPOSTOR, impostorCount)
 
+
         remainingImpostors = impostorCount
         startImpostors = impostorCount
         gameEnded = false
+
 
         return true
     }
@@ -56,7 +81,7 @@ object GameLogic {
         }
     }
 
-    fun getRoleForPlayer(index: Int): Role? = players.getOrNull(index)?.role
+    private fun getRoleForPlayer(index: Int): Role? = players.getOrNull(index)?.role
 
     fun getWordForPlayer(index: Int): String? {
         return when (getRoleForPlayer(index)) {
@@ -79,6 +104,7 @@ object GameLogic {
 
     fun checkImpostorGuessAndEndGame(guess: String): Boolean {
         val correct = guess.trim().lowercase() == selectedPair?.crewWord?.lowercase()
+        Log.d("WordPair", selectedPair.toString())
         if (correct) {
             gameEnded = true
         }
@@ -86,7 +112,7 @@ object GameLogic {
     }
 
 
-    fun isGameOver(): Boolean = remainingImpostors == 0 || gameEnded
+    fun isGameOver(): Boolean = !isCrewGame && remainingImpostors == 0 || gameEnded
 
     fun resetGame() {
         players.clear()

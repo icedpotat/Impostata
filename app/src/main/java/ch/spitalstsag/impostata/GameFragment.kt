@@ -12,9 +12,12 @@ import android.widget.*
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import ch.spitalstsag.impostata.model.Role
+import androidx.activity.OnBackPressedCallback
+
 
 class GameFragment : Fragment() {
     private enum class GamePhase { SETUP, PLAYING, VOTING, RESULT }
+    private enum class Direction { CLOCKWISE, COUNTERCLOCKWISE }
 
     private lateinit var gameLogic: GameLogic
 
@@ -139,15 +142,25 @@ class GameFragment : Fragment() {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 selectedPlayerCount = progress + 3
                 playerCountLabel.text = "$selectedPlayerCount Spieler"
-                updateCivilianCount()
+
+                val maxRoles = selectedPlayerCount / 2 + 1
+                val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
+                val impostor = ImpostorCountText.text.toString().toIntOrNull() ?: 0
+
+                val correctedUndercover = undercover.coerceAtMost(maxRoles)
+                val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
+
+                undercoverCountText.text = correctedUndercover.toString()
+                ImpostorCountText.text = correctedImpostor.toString()
+
                 addNameInputs()
                 updateCivilianCount()
                 updateRoleButtonsVisibility()
-
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
+
 
         importButton.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -259,6 +272,12 @@ class GameFragment : Fragment() {
 
         votingButtonsContainer.removeAllViews()
 
+        val activePlayers = gameLogic.players.filter { !it.isEjected }
+        val starter = activePlayers.random().name
+        val direction = if ((0..1).random() == 0) "↪ (Uhrzeigersinn)" else "↩ (Gegen den Uhrzeigersinn)"
+        Toast.makeText(requireContext(), "$starter beginnt. Richtung: $direction", Toast.LENGTH_LONG).show()
+
+
         gameLogic.players.forEachIndexed { index, player ->
             if (!player.isEjected) {
                 Button(requireContext()).apply {
@@ -272,12 +291,13 @@ class GameFragment : Fragment() {
     private fun resolveVote(index: Int) {
         setGamePhase(GamePhase.RESULT)
 
-
         val role = gameLogic.players[index].role
         gameLogic.ejectPlayer(index)
 
+        val activePlayers = gameLogic.players.filter { !it.isEjected }
+
         val playerName = gameLogic.players[index].name
-        voteResultText.text = "$playerName wurde rausgeworfen. Rolle: $role"
+        voteResultText.text = "$playerName wurde rausgeworfen.\n\nRolle: $role"
 
         if (role == Role.IMPOSTOR) {
             ImpostorGuessLayout.visibility = View.VISIBLE
@@ -288,8 +308,8 @@ class GameFragment : Fragment() {
             btnContinueVoting.visibility = View.VISIBLE
         }
 
-        if (gameLogic.isGameOver()) {
-            voteResultText.append("\nDas Spiel ist beendet")
+        if (gameLogic.isGameOver() || activePlayers.isEmpty()) {
+            voteResultText.append("\n\nDas Spiel ist beendet")
             btnContinueVoting.visibility = View.GONE
             btnRestartGame.visibility = View.VISIBLE
         }
@@ -305,6 +325,8 @@ class GameFragment : Fragment() {
         } else {
             "Falsches Wort, u suck lol"
         }
+
+        ImpostorGuessInput.text?.clear()
 
         ImpostorGuessLayout.visibility = View.GONE
         btnConfirmGuess.visibility = View.GONE
@@ -322,11 +344,27 @@ class GameFragment : Fragment() {
         groupContainer.removeAllViews()
         playerCountLabel.visibility = View.VISIBLE
         playerCountSlider.visibility = View.VISIBLE
+
+        // Reset selectedPlayerCount from nameInputs
+        selectedPlayerCount = nameInputsContainer.childCount.takeIf { it > 0 } ?: 3
+        playerCountSlider.progress = selectedPlayerCount - 3
+
+        // Clamp roles
+        val maxRoles = selectedPlayerCount / 2 + 1
+        val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
+        val impostor = ImpostorCountText.text.toString().toIntOrNull() ?: 0
+
+        val correctedUndercover = undercover.coerceAtMost(maxRoles)
+        val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
+
+        undercoverCountText.text = correctedUndercover.toString()
+        ImpostorCountText.text = correctedImpostor.toString()
+
         addNameInputs()
         updateCivilianCount()
         updateRoleButtonsVisibility()
-
     }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -370,4 +408,19 @@ class GameFragment : Fragment() {
             btnStartGame.visibility = View.VISIBLE
         }
     }
+    override fun onResume() {
+        super.onResume()
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // If not in setup phase, reset game
+                if (setupLayout.visibility != View.VISIBLE) {
+                    restartGame()
+                } else {
+                    isEnabled = false
+                    requireActivity().onBackPressed()
+                }
+            }
+        })
+    }
+
 }
