@@ -15,6 +15,7 @@ import ch.spitalstsag.impostata.model.Group
 import androidx.core.graphics.toColorInt
 import ch.spitalstsag.impostata.model.Player
 import com.google.gson.Gson
+import androidx.core.content.edit
 
 class GroupActivity : AppCompatActivity() {
 
@@ -44,7 +45,7 @@ class GroupActivity : AppCompatActivity() {
             view.findViewById<LinearLayout>(R.id.groupCard).setBackgroundColor(group.colorHex.toColorInt())
 
             // Edit button listener
-            view.findViewById<ImageButton>(R.id.editGroupBtn).setOnClickListener {
+            view.findViewById<Button>(R.id.editGroupBtn).setOnClickListener {
                 showEditGroupDialog(index)
             }
 
@@ -97,7 +98,7 @@ class GroupActivity : AppCompatActivity() {
         val prefs = context.getSharedPreferences("impostata_prefs", Context.MODE_PRIVATE)
         val gson = Gson()
         val json = gson.toJson(groups)
-        prefs.edit().putString("groups_json", json).apply()
+        prefs.edit { putString("groups_json", json) }
     }
 
     fun loadGroups(context: Context): MutableList<Group> {
@@ -115,11 +116,9 @@ class GroupActivity : AppCompatActivity() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_group, null)
         val groupNameInput = dialogView.findViewById<EditText>(R.id.groupNameInput)
         val playersInput = dialogView.findViewById<EditText>(R.id.playersInput) // Comma separated player names
-        val colorInput = dialogView.findViewById<EditText>(R.id.colorInput) // Hex color string
 
         groupNameInput.setText(group.name)
         playersInput.setText(group.players.joinToString(", ") { it.name })
-        colorInput.setText(group.colorHex)
 
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Edit Group")
@@ -133,9 +132,8 @@ class GroupActivity : AppCompatActivity() {
                     .filter { it.isNotEmpty() }
                     .map { Player(it) }
                     .toMutableList()
-                val newColor = colorInput.text.toString().takeIf { it.matches(Regex("#[0-9a-fA-F]{6}")) } ?: "#FF9800"
 
-                groups[groupIndex] = Group(newName, newColor, newPlayers)
+                groups[groupIndex] = Group(newName,group.colorHex, newPlayers)
                 saveGroups(this, groups)
                 displayGroups(findViewById(R.id.groupListContainer))
             }

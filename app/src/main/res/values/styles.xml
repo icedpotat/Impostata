@@ -1,0 +1,9 @@
+<resources>
+    <style name="PixelButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/pixel_button</item>
+        <item name="android:textColor">@color/pixel_text</item>
+        <item name="android:fontFamily">@font/pixel_font</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:padding">8dp</item>
+    </style>
+</resources>

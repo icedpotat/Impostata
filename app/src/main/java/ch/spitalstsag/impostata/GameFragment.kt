@@ -290,10 +290,11 @@ class GameFragment : Fragment() {
 
     private fun confirmImpostorGuess() {
         val guess = ImpostorGuessInput.text.toString()
-        val correct = gameLogic.checkImpostorGuess(guess)
+        val correct = gameLogic.checkImpostorGuessAndEndGame(guess)
 
         voteResultText.text = if (correct) {
             "Impostor hat richtig geraten! Impostor gewinnen."
+
         } else {
             "Falsches Wort. Das Spiel geht weiter."
         }
@@ -346,7 +347,7 @@ class GameFragment : Fragment() {
             val groupView = LayoutInflater.from(requireContext()).inflate(R.layout.item_group, groupContainer, false)
             groupView.findViewById<TextView>(R.id.groupNameText).text = groupName
             groupView.findViewById<TextView>(R.id.playerListText).text = playerNames.toString()
-            groupView.findViewById<ImageButton>(R.id.editGroupBtn).visibility = View.GONE
+            groupView.findViewById<Button>(R.id.editGroupBtn).visibility = View.GONE
 
             playerCountLabel.visibility = View.GONE
             playerCountSlider.visibility = View.GONE

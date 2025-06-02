@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/groupCard"
     android:layout_width="match_parent"
@@ -5,7 +6,7 @@
     android:layout_marginBottom="12dp"
     android:padding="12dp"
     android:orientation="vertical"
-    android:background="@drawable/group_card_bg">
+    android:background="@drawable/pixel_panel">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -16,18 +17,20 @@
             android:text="Group Name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/pixel_text"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/pixel_font" />
 
-        <ImageButton
+        <Button
             android:id="@+id/editGroupBtn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_edit"
-            android:contentDescription="Edit Group" />
+            android:text="Edit"
+            style="@style/PixelButton"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp" />
     </RelativeLayout>
 
     <TextView
@@ -35,6 +38,8 @@
         android:text="Player1, Player2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#CCCCCC"
-        android:layout_marginTop="4dp" />
+        android:textColor="@color/pixel_cyan"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/pixel_font"
+        android:textSize="12sp" />
 </LinearLayout>

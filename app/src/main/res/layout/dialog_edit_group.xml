@@ -18,11 +18,4 @@
         android:hint="Players (comma separated)"
         android:inputType="text" />
 
-    <EditText
-        android:id="@+id/colorInput"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Color Hex (e.g. #FF9800)"
-        android:inputType="text" />
-
 </LinearLayout>

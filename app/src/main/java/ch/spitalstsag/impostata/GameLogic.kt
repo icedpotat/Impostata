@@ -77,11 +77,16 @@ object GameLogic {
         }
     }
 
-    fun checkImpostorGuess(guess: String): Boolean {
-        return guess.trim().lowercase() == selectedPair?.crewWord?.lowercase()
+    fun checkImpostorGuessAndEndGame(guess: String): Boolean {
+        val correct = guess.trim().lowercase() == selectedPair?.crewWord?.lowercase()
+        if (correct) {
+            gameEnded = true
+        }
+        return correct
     }
 
-    fun isGameOver(): Boolean = remainingImpostors <= 1
+
+    fun isGameOver(): Boolean = remainingImpostors == 0 || gameEnded
 
     fun resetGame() {
         players.clear()
