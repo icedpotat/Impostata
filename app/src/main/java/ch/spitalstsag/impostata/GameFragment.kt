@@ -123,7 +123,7 @@ class GameFragment : Fragment() {
 
     private fun updateCivilianCount() {
         val (_, _, civilian) = getRoleCounts()
-        civilianCountText.text = "Zivile: $civilian"
+        civilianCountText.text = "Crew: $civilian"
     }
 
     private fun updateRoleButtonsVisibility() {
