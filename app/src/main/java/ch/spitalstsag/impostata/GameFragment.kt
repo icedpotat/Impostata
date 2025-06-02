@@ -308,7 +308,7 @@ class GameFragment : Fragment() {
 
         ImpostorGuessLayout.visibility = View.GONE
         btnConfirmGuess.visibility = View.GONE
-        if (!correct && !gameLogic.isGameOver()) btnContinueVoting.visibility = View.VISIBLE
+        if (!correct && !gameLogic.isGameOver()) btnContinueVoting.visibility = View.VISIBLE else btnRestartGame.visibility = View.VISIBLE
     }
 
     private fun restartGame() {
