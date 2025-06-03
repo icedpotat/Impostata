@@ -2,6 +2,8 @@ package ch.spitalstsag.impostata
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
@@ -13,6 +15,8 @@ import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import ch.spitalstsag.impostata.model.Role
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 
 
 class GameFragment : Fragment() {
@@ -26,7 +30,7 @@ class GameFragment : Fragment() {
     private lateinit var votingLayout: ViewGroup
     private lateinit var resultLayout: ViewGroup
 
-    private lateinit var nameInputsContainer: LinearLayout
+    private lateinit var nameInputsContainer: GridLayout
     private lateinit var currentPlayerText: TextView
     private lateinit var btnShowWord: Button
     private lateinit var wordDisplayLayout: ViewGroup
@@ -190,16 +194,33 @@ class GameFragment : Fragment() {
     }
 
     private fun addNameInputs() {
-        nameInputsContainer.removeAllViews()
+        val grid = nameInputsContainer as GridLayout
+        grid.removeAllViews()
+
         for (i in 0 until selectedPlayerCount) {
             val et = EditText(requireContext()).apply {
-                hint = "Spieler ${i + 1} Name"
+                hint = "Spieler ${i + 1}"
                 inputType = InputType.TYPE_CLASS_TEXT
+                setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
+                setHintTextColor(Color.GRAY)
+                backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.pixel_text))
+                typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
+                textSize = 14f
+                layoutParams = GridLayout.LayoutParams().apply {
+                    width = 0
+                    height = ViewGroup.LayoutParams.WRAP_CONTENT
+                    columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                    setMargins(8, 8, 8, 8)
+                }
             }
-            nameInputsContainer.addView(et)
+
+            grid.addView(et)
         }
+
         btnStartGame.visibility = View.VISIBLE
     }
+
+
 
     private fun startGame() {
         val playerNames = nameInputsContainer.children
@@ -397,15 +418,44 @@ class GameFragment : Fragment() {
 
             selectedPlayerCount = playerNames?.size ?: 0
             playerCountLabel.text = "$selectedPlayerCount Spieler"
-            nameInputsContainer.removeAllViews()
-            playerNames?.forEach {
-                EditText(requireContext()).apply {
-                    setText(it)
+            val grid = nameInputsContainer as GridLayout
+            grid.removeAllViews()
+
+            playerNames?.forEachIndexed { i, name ->
+                val et = EditText(requireContext()).apply {
+                    setText(name)
+                    hint = "Spieler ${i + 1}"
                     inputType = InputType.TYPE_CLASS_TEXT
-                }.also { nameInputsContainer.addView(it) }
+                    setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
+                    setHintTextColor(Color.GRAY)
+                    backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.pixel_text))
+                    typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
+                    textSize = 14f
+                    layoutParams = GridLayout.LayoutParams().apply {
+                        width = 0
+                        height = ViewGroup.LayoutParams.WRAP_CONTENT
+                        columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                        setMargins(8, 8, 8, 8)
+                    }
+                }
+
+                grid.addView(et)
             }
 
+            val maxRoles = selectedPlayerCount / 2 + 1
+            val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
+            val impostor = ImpostorCountText.text.toString().toIntOrNull() ?: 0
+
+            val correctedUndercover = undercover.coerceAtMost(maxRoles)
+            val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
+
+            undercoverCountText.text = correctedUndercover.toString()
+            ImpostorCountText.text = correctedImpostor.toString()
+
+            updateCivilianCount()
+            updateRoleButtonsVisibility()
             btnStartGame.visibility = View.VISIBLE
+
         }
     }
     override fun onResume() {

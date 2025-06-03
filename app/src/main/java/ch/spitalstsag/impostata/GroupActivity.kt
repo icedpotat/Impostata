@@ -36,6 +36,7 @@ class GroupActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_group)
+        supportActionBar?.hide()
 
         groups = loadGroups(this)
         displayGroups(findViewById(R.id.groupListContainer))
