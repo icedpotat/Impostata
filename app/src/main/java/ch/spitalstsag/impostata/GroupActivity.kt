@@ -26,6 +26,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
 import androidx.room.util.copy
 import android.util.Log
+import android.view.View
 
 
 class GroupActivity : AppCompatActivity() {
@@ -43,8 +44,16 @@ class GroupActivity : AppCompatActivity() {
         displayGroups(container)
 
         val addGroupButton = findViewById<Button>(R.id.addGroupButton)
-        addGroupButton.setOnClickListener { showAddGroupDialog()
-        Log.d("AddGroupButton","Clicked")
+        addGroupButton.setOnClickListener {
+            showGroupDialog(
+                onSave = { newGroup ->
+                    groups.add(newGroup)
+                    saveGroups(this, groups)
+                    displayGroups(findViewById(R.id.groupListContainer))
+                }
+            )
+
+            Log.d("AddGroupButton","Clicked")
         }
 
     }
@@ -59,7 +68,20 @@ class GroupActivity : AppCompatActivity() {
 
             // Edit button listener
             view.findViewById<Button>(R.id.editGroupBtn).setOnClickListener {
-                showEditGroupDialog(index)
+                showGroupDialog(
+                    initialGroup = groups[index],
+                    onSave = { updatedGroup ->
+                        groups[index] = updatedGroup
+                        saveGroups(this, groups)
+                        displayGroups(findViewById(R.id.groupListContainer))
+                    },
+                    onDelete = {
+                        groups.removeAt(index)
+                        saveGroups(this, groups)
+                        displayGroups(findViewById(R.id.groupListContainer))
+                    }
+                )
+
             }
 
             // Group card click - select group and return
@@ -72,21 +94,34 @@ class GroupActivity : AppCompatActivity() {
     }
 
 
-    private fun showAddGroupDialog() {
+    private fun showGroupDialog(
+        initialGroup: Group? = null,
+        onSave: (Group) -> Unit,
+        onDelete: (() -> Unit)? = null
+    ) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_group, null)
         val nameInput = dialogView.findViewById<EditText>(R.id.editGroupName)
         val addPlayerButton = dialogView.findViewById<Button>(R.id.btnAddPlayer)
         val playerContainer = dialogView.findViewById<LinearLayout>(R.id.playerInputsContainer)
+        val deleteButton = dialogView.findViewById<Button?>(R.id.btnDelete)
 
-        // Add first 3 input fields by default
-        repeat(3) { addPlayerInput(playerContainer) }
-        Log.d("PlayerContainer","Populated")
+        if (initialGroup != null) {
+            nameInput.setText(initialGroup.name)
+            initialGroup.players.forEach { player ->
+                addPlayerInput(playerContainer, player.name)
+            }
+            deleteButton.visibility = View.VISIBLE
+        } else {
+            repeat(3) { addPlayerInput(playerContainer) }
+            deleteButton.visibility = View.GONE
+        }
 
         addPlayerButton.setOnClickListener {
             if (playerContainer.childCount < 20) {
                 addPlayerInput(playerContainer)
             }
         }
+
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
             .create()
@@ -113,7 +148,6 @@ class GroupActivity : AppCompatActivity() {
             btn.maxLines = 1
         }
 
-        // Add group logic
         addButton.setOnClickListener {
             val groupName = nameInput.text.toString().trim()
             val playerNames = playerContainer.children
@@ -128,27 +162,31 @@ class GroupActivity : AppCompatActivity() {
                 .filter { it.isNotEmpty() }
 
             if (groupName.isNotEmpty() && !playerNames.none()) {
-                val newGroup = Group(
+                val group = Group(
                     name = groupName,
-                    colorHex = getRandomColorHex(),
+                    colorHex = initialGroup?.colorHex ?: getRandomColorHex(),
                     players = playerNames.map { Player(it) }.toMutableList()
                 )
-                groups.add(newGroup)
-                Log.d("New Group",newGroup.toString())
-                saveGroups(this, groups)
-                displayGroups(findViewById(R.id.groupListContainer))
+                onSave(group)
+                dialog.dismiss()
+            } else {
+                Toast.makeText(this, "Bitte Gruppennamen und Spieler eingeben", Toast.LENGTH_SHORT).show()
             }
-            dialog.dismiss()
         }
 
         cancelButton.setOnClickListener {
             dialog.dismiss()
         }
 
+        deleteButton?.setOnClickListener {
+            onDelete?.invoke()
+            dialog.dismiss()
+        }
+
         dialog.show()
     }
 
-    private fun addPlayerInput(container: LinearLayout) {
+    private fun addPlayerInput(container: LinearLayout, name: String = "") {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(
@@ -159,37 +197,36 @@ class GroupActivity : AppCompatActivity() {
 
         val input = EditText(this).apply {
             hint = "Spielername"
+            setText(name)
             inputType = InputType.TYPE_CLASS_TEXT
             setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
             setHintTextColor(Color.GRAY)
             backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.pixel_text))
             typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
             textSize = 14f
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
 
-        val deleteBtn = Button(this, null, 0, R.style.PixelXButton)
-
-        deleteBtn.text = "x"
-        deleteBtn.setTextColor(ContextCompat.getColor(this, R.color.pixel_text))
-        deleteBtn.backgroundTintList = ColorStateList.valueOf("#444444".toColorInt())
-        deleteBtn.typeface = ResourcesCompat.getFont(this, R.font.pixel_font)
-        deleteBtn.textSize = 14f
-        deleteBtn.setOnClickListener {
+        val deleteBtn = Button(this, null, 0, R.style.PixelXButton).apply {
+            text = "x"
+            setTextColor(ContextCompat.getColor(this@GroupActivity, R.color.pixel_text))
+            backgroundTintList = ColorStateList.valueOf("#444444".toColorInt())
+            typeface = ResourcesCompat.getFont(this@GroupActivity, R.font.pixel_font)
+            textSize = 14f
+            setOnClickListener {
                 if (container.childCount > 3) {
                     container.removeView(row)
                 } else {
-                    Toast.makeText(this, "Mindestens 3 Spieler benötigt", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@GroupActivity, "Mindestens 3 Spieler benötigt", Toast.LENGTH_SHORT).show()
                 }
             }
-
+        }
 
         row.addView(input)
         row.addView(deleteBtn)
         container.addView(row)
-
     }
+
 
 
     private fun getRandomColorHex(): String {
