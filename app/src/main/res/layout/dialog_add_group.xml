@@ -6,11 +6,15 @@
     android:background="@drawable/pixel_panel"
     android:padding="16dp">
 
+
+
     <EditText
         android:id="@+id/editGroupName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:autofillHints=""
         android:hint="Gruppenname"
+        android:inputType="text"
         android:textColor="@color/pixel_text"
         android:textColorHint="#AAAAAA"
         android:backgroundTint="@color/pixel_text"
@@ -48,5 +52,6 @@
             android:text="+"
             style="@style/PixelButton" />
     </LinearLayout>
+    <include layout="@layout/dialog_buttons_horizontal" />
 
 </LinearLayout>

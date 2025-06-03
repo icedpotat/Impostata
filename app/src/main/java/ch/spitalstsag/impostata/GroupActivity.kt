@@ -3,20 +3,30 @@ package ch.spitalstsag.impostata
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
+import android.text.InputType
+import android.view.ContextThemeWrapper
+import android.view.Gravity
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import ch.spitalstsag.impostata.model.Group
 import androidx.core.graphics.toColorInt
 import ch.spitalstsag.impostata.model.Player
 import com.google.gson.Gson
 import androidx.core.content.edit
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
+import androidx.room.util.copy
+import android.util.Log
+
 
 class GroupActivity : AppCompatActivity() {
 
@@ -32,8 +42,10 @@ class GroupActivity : AppCompatActivity() {
         val container = findViewById<LinearLayout>(R.id.groupListContainer)
         displayGroups(container)
 
-        val addButton = findViewById<Button>(R.id.addGroupButton)
-        addButton.setOnClickListener { showAddGroupDialog() }
+        val addGroupButton = findViewById<Button>(R.id.addGroupButton)
+        addGroupButton.setOnClickListener { showAddGroupDialog()
+        Log.d("AddGroupButton","Clicked")
+        }
 
     }
 
@@ -68,54 +80,117 @@ class GroupActivity : AppCompatActivity() {
 
         // Add first 3 input fields by default
         repeat(3) { addPlayerInput(playerContainer) }
+        Log.d("PlayerContainer","Populated")
 
         addPlayerButton.setOnClickListener {
-            addPlayerInput(playerContainer)
+            if (playerContainer.childCount < 20) {
+                addPlayerInput(playerContainer)
+            }
+        }
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        val addButton = dialogView.findViewById<Button>(R.id.btnAdd)
+        val cancelButton = dialogView.findViewById<Button>(R.id.btnCancel)
+
+        val layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+            marginEnd = 8
         }
 
-        AlertDialog.Builder(this)
-            .setTitle("Gruppe hinzufügen")
-            .setView(dialogView)
-            .setPositiveButton("Hinzufügen") { _, _ ->
-                val groupName = nameInput.text.toString().trim()
+        addButton.layoutParams = layoutParams
+        cancelButton.layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
 
-                val playerNames = playerContainer.children
-                    .filterIsInstance<EditText>()
-                    .map { it.text.toString().trim() }
-                    .filter { it.isNotEmpty() }
+        addButton.setPadding(0, 8, 0, 8)
+        cancelButton.setPadding(0, 8, 0, 8)
 
-                if (groupName.isNotEmpty() && !playerNames.none()) {
-                    val newGroup = Group(
-                        name = groupName,
-                        colorHex = getRandomColorHex(),
-                        players = playerNames.map { Player(it) }.toMutableList()
-                    )
-                    groups.add(newGroup)
-                    saveGroups(this, groups)
-                    displayGroups(findViewById(R.id.groupListContainer))
+        listOf(addButton, cancelButton).forEach { btn ->
+            btn.setTextColor(ContextCompat.getColor(this, R.color.pixel_text))
+            btn.backgroundTintList = ColorStateList.valueOf("#444444".toColorInt())
+            btn.typeface = ResourcesCompat.getFont(this, R.font.pixel_font)
+            btn.textSize = 12f
+            btn.ellipsize = null
+            btn.maxLines = 1
+        }
+
+        // Add group logic
+        addButton.setOnClickListener {
+            val groupName = nameInput.text.toString().trim()
+            val playerNames = playerContainer.children
+                .mapNotNull { row ->
+                    (row as? LinearLayout)?.children
+                        ?.filterIsInstance<EditText>()
+                        ?.firstOrNull()
+                        ?.text
+                        ?.toString()
+                        ?.trim()
                 }
+                .filter { it.isNotEmpty() }
+
+            if (groupName.isNotEmpty() && !playerNames.none()) {
+                val newGroup = Group(
+                    name = groupName,
+                    colorHex = getRandomColorHex(),
+                    players = playerNames.map { Player(it) }.toMutableList()
+                )
+                groups.add(newGroup)
+                Log.d("New Group",newGroup.toString())
+                saveGroups(this, groups)
+                displayGroups(findViewById(R.id.groupListContainer))
             }
-            .setNegativeButton("Abbrechen", null)
-            .show()
+            dialog.dismiss()
+        }
+
+        cancelButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun addPlayerInput(container: LinearLayout) {
-        val input = EditText(this).apply {
-            hint = "Spielername"
-            inputType = android.text.InputType.TYPE_CLASS_TEXT
-            setTextColor(getColor(R.color.pixel_text))
-            setHintTextColor(getColor(android.R.color.darker_gray))
-            backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.pixel_text))
-            setPadding(16, 16, 16, 16)
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                topMargin = 8
-            }
+            ).apply { topMargin = 8 }
         }
-        container.addView(input)
+
+        val input = EditText(this).apply {
+            hint = "Spielername"
+            inputType = InputType.TYPE_CLASS_TEXT
+            setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
+            setHintTextColor(Color.GRAY)
+            backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.pixel_text))
+            typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
+            textSize = 14f
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+
+        }
+
+        val deleteBtn = Button(this, null, 0, R.style.PixelXButton)
+
+        deleteBtn.text = "x"
+        deleteBtn.setTextColor(ContextCompat.getColor(this, R.color.pixel_text))
+        deleteBtn.backgroundTintList = ColorStateList.valueOf("#444444".toColorInt())
+        deleteBtn.typeface = ResourcesCompat.getFont(this, R.font.pixel_font)
+        deleteBtn.textSize = 14f
+        deleteBtn.setOnClickListener {
+                if (container.childCount > 3) {
+                    container.removeView(row)
+                } else {
+                    Toast.makeText(this, "Mindestens 3 Spieler benötigt", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+
+        row.addView(input)
+        row.addView(deleteBtn)
+        container.addView(row)
+
     }
+
 
     private fun getRandomColorHex(): String {
         val colors = listOf("#F44336", "#2196F3", "#4CAF50", "#FF9800", "#9C27B0", "#00BCD4", "#FF5722")
@@ -148,7 +223,7 @@ class GroupActivity : AppCompatActivity() {
         groupNameInput.setText(group.name)
         playersInput.setText(group.players.joinToString(", ") { it.name })
 
-        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Edit Group")
             .setView(dialogView)
             .setPositiveButton("Save") { _, _ ->

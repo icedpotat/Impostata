@@ -6,4 +6,27 @@
         <item name="android:textSize">14sp</item>
         <item name="android:padding">8dp</item>
     </style>
+
+    <style name="PixelXButton" parent="Widget.AppCompat.Button">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:text">×</item>
+        <item name="android:textColor">#AAAAAA</item>
+        <item name="android:fontFamily">@font/pixel_font</item>
+        <item name="android:backgroundTint">#444444</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="PixelDialogTheme" parent="Theme.AppCompat.Dialog">
+        <item name="android:background">@drawable/pixel_panel</item>
+        <item name="android:textColor">@color/pixel_text</item>
+        <item name="buttonBarStyle">@style/PixelDialogButtonBar</item>
+    </style>
+
+    <style name="PixelDialogButtonBar" parent="Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">end</item>
+    </style>
+
+
 </resources>
