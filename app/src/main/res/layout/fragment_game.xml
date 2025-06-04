@@ -1,54 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/pixel_bg"
+    android:orientation="vertical"
     android:padding="16dp">
 
 
     <!-- Setup Phase -->
     <LinearLayout
         android:id="@+id/setupLayout"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/pixel_panel"
+        android:orientation="vertical"
         android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical|end">
+            android:gravity="center_vertical|end"
+            android:orientation="horizontal">
 
             <TextView
-                android:text="Impostata Spiel"
-                android:textSize="18sp"
-                android:textColor="@color/pixel_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
                 android:fontFamily="@font/pixel_font"
-                android:padding="8dp" />
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="Impostata Spiel"
+                android:textColor="@color/pixel_text"
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btnSelectGroup"
-                android:text="Gruppen"
                 style="@style/PixelButton"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="Gruppen" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/selectedGroupContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_marginTop="0dp"
+            android:orientation="vertical"
             android:padding="12dp" />
 
         <TextView
@@ -56,11 +55,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginTop="12dp"
+            android:fontFamily="@font/pixel_font"
             android:text="3 Spieler"
             android:textColor="@color/pixel_text"
-            android:fontFamily="@font/pixel_font"
-            android:textSize="14sp"
-            android:layout_marginTop="12dp" />
+            android:textSize="14sp" />
 
         <SeekBar
             android:id="@+id/playerCountSlider"
@@ -68,104 +67,104 @@
             android:layout_height="wrap_content"
             android:max="17"
             android:progress="0"
-            android:thumbTint="@color/pixel_text"
-            android:progressTint="@color/pixel_text" />
+            android:progressTint="@color/pixel_text"
+            android:thumbTint="@color/pixel_text" />
 
         <!-- Role Controls -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/pixel_font"
             android:text="Rollen"
             android:textColor="@color/pixel_yellow"
-            android:fontFamily="@font/pixel_font"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp" />
+            android:textSize="16sp" />
         <!-- Undercover Controls -->
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:gravity="center"
-            android:layout_marginTop="16dp">
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnUndercoverMinus"
-                android:text="–"
                 style="@style/PixelButton"
                 android:layout_width="40dp"
-                android:layout_height="40dp" />
+                android:layout_height="40dp"
+                android:text="–" />
 
             <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/ic_undercover"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="4dp"
-                android:contentDescription="Undercover Icon" />
+                android:contentDescription="Undercover Icon"
+                android:src="@drawable/ic_undercover" />
 
             <TextView
                 android:id="@+id/undercoverCountText"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:fontFamily="@font/pixel_font"
                 android:gravity="center"
-                android:text="0"
-                android:textSize="16sp"
-                android:lineHeight="16sp"
                 android:includeFontPadding="false"
+                android:lineHeight="16sp"
+                android:text="0"
                 android:textColor="@color/pixel_text"
-                android:fontFamily="@font/pixel_font" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnUndercoverPlus"
-                android:text="+"
                 style="@style/PixelButton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginStart="4dp" />
+                android:layout_marginStart="4dp"
+                android:text="+" />
         </LinearLayout>
         <!-- Impostor Controls -->
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:gravity="center"
-            android:layout_marginTop="4dp">
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnImpostorMinus"
-                android:text="–"
                 style="@style/PixelButton"
                 android:layout_width="40dp"
-                android:layout_height="40dp"/>
+                android:layout_height="40dp"
+                android:text="–" />
 
             <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/ic_impostor"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="4dp"
-                android:contentDescription="Impostor Icon" />
+                android:contentDescription="Impostor Icon"
+                android:src="@drawable/ic_impostor" />
 
             <TextView
                 android:id="@+id/ImpostorCountText"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:fontFamily="@font/pixel_font"
                 android:gravity="center"
-                android:text="1"
-                android:textSize="16sp"
-                android:lineHeight="16sp"
                 android:includeFontPadding="false"
+                android:lineHeight="16sp"
+                android:text="1"
                 android:textColor="@color/pixel_text"
-                android:fontFamily="@font/pixel_font" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnImpostorPlus"
-                android:text="+"
                 style="@style/PixelButton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginStart="4dp" />
+                android:layout_marginStart="4dp"
+                android:text="+" />
 
 
         </LinearLayout>
@@ -174,200 +173,204 @@
             android:id="@+id/civilianCountText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp"
             android:layout_gravity="center"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/pixel_font"
+            android:padding="10dp"
             android:text="Zivile: 0"
             android:textColor="@color/pixel_text"
-            android:textSize="14sp"
-            android:fontFamily="@font/pixel_font"
-            android:layout_marginTop="8dp" />
+            android:textSize="14sp" />
 
         <ScrollView
+            android:id="@+id/nameInputsScrollView"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="175dp"
             android:layout_marginTop="0dp"
             android:fillViewport="true"
             android:scrollbars="vertical">
+
             <LinearLayout
+                android:id="@+id/nameInputsLinearContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
                 <GridLayout
                     android:id="@+id/nameInputsContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:columnCount="2"
-                    android:padding="4dp"/>
+                    android:padding="4dp" />
+
             </LinearLayout>
         </ScrollView>
 
 
-
         <Button
             android:id="@+id/btnStartGame"
-            android:text="Spiel starten"
             style="@style/PixelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="8dp"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:text="Spiel starten"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/importWordsButton"
-            android:text="Wörter importieren"
             style="@style/PixelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="4dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:text="Wörter importieren" />
     </LinearLayout>
 
 
     <!-- Game Phase -->
     <LinearLayout
         android:id="@+id/gameLayout"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/pixel_panel"
+        android:orientation="vertical"
         android:visibility="gone">
 
         <TextView
             android:id="@+id/currentPlayerText"
-            android:textSize="18sp"
-            android:textColor="@color/pixel_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/pixel_font"
-            android:padding="8dp" />
+            android:padding="8dp"
+            android:textColor="@color/pixel_text"
+            android:textSize="18sp" />
 
         <Button
             android:id="@+id/btnShowWord"
-            android:text="Meine Rolle anzeigen"
             style="@style/PixelButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="Meine Rolle anzeigen" />
 
         <LinearLayout
             android:id="@+id/wordDisplayLayout"
-            android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:visibility="gone">
 
             <TextView
                 android:id="@+id/wordText"
-                android:textColor="@color/pixel_text"
-                android:textSize="16sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/pixel_font"
-                android:padding="8dp" />
+                android:padding="8dp"
+                android:textColor="@color/pixel_text"
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnNextPlayer"
-                android:text="Weitergeben"
+                style="@style/PixelButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/PixelButton"/>
+                android:text="Weitergeben" />
         </LinearLayout>
     </LinearLayout>
 
     <!-- Voting Phase -->
     <LinearLayout
         android:id="@+id/votingLayout"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         android:background="@drawable/pixel_panel"
-        android:padding="16dp">
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
 
         <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pixel_font"
             android:text="Stimmt ab, wer der Impostor ist!"
             android:textColor="@color/pixel_text"
-            android:textSize="16sp"
-            android:fontFamily="@font/pixel_font"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:textSize="16sp" />
 
         <LinearLayout
             android:id="@+id/votingButtonsLayout"
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:orientation="vertical" />
     </LinearLayout>
 
     <!-- Result Phase -->
     <LinearLayout
         android:id="@+id/resultLayout"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         android:background="@drawable/pixel_panel"
-        android:padding="16dp">
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/voteResultText"
-            android:textColor="@color/pixel_text"
-            android:textSize="14sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/pixel_font"
             android:paddingBottom="8dp"
-            android:fontFamily="@font/pixel_font" />
+            android:textColor="@color/pixel_text"
+            android:textSize="14sp" />
 
         <LinearLayout
             android:id="@+id/ImpostorGuessLayout"
-            android:orientation="vertical"
-            android:visibility="gone"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <TextView
-                android:text="Impostor, rate das Crew-Wort:"
-                android:textColor="@color/pixel_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/pixel_font" />
+                android:fontFamily="@font/pixel_font"
+                android:text="Impostor, rate das Crew-Wort:"
+                android:textColor="@color/pixel_text" />
 
             <EditText
                 android:id="@+id/ImpostorGuessInput"
-                android:hint="Crew-Wort"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/pixel_text"
+                android:hint="Crew-Wort"
                 android:textColor="@color/pixel_text"
                 android:textColorHint="#AAAAAA" />
 
             <Button
                 android:id="@+id/btnConfirmGuess"
-                android:text="Bestätigen"
                 style="@style/PixelButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:text="Bestätigen" />
         </LinearLayout>
 
         <Button
             android:id="@+id/btnContinueVoting"
-            android:text="Weiter zur nächsten Abstimmung"
             style="@style/PixelButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:text="Weiter zur nächsten Abstimmung"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btnRestartGame"
-            android:text="Neues Spiel starten"
             style="@style/PixelButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:text="Neues Spiel starten"
+            android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>
 

@@ -15,17 +15,18 @@ object GameLogic {
         WordPair("Post", "Paketdienst"),
         WordPair("Teller", "Pfanne")
     )
-    private var wordPairs = wordPairsMaster.toMutableList()
-    val customWordPairs = mutableListOf<WordPair>()
+    private var wordPairs = mutableListOf<WordPair>()
+    private val usedWordPairs = mutableListOf<WordPair>()
+    private val customWordPairs = mutableListOf<WordPair>()
 
     var players = mutableListOf<Player>()
-    var selectedPair: WordPair? = null
-    var remainingImpostors = 0
-    var startImpostors = 0
+    private var selectedPair: WordPair? = null
+    private var remainingImpostors = 0
+    private var startImpostors = 0
     var gameEnded = false
 
-    var isCrewGame = false
-    var isImpostorGame = false
+    private var isCrewGame = false
+    private var isImpostorGame = false
 
     fun setupGame(playerNames: List<String>, undercoverCount: Int, impostorCountOriginal: Int): Boolean {
         isCrewGame = false
@@ -54,8 +55,19 @@ object GameLogic {
             return true
         }
 
-        wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
-        if(!isImpostorGame) selectedPair = wordPairs.removeAt(Random.nextInt(wordPairs.size))
+        if (wordPairs.isEmpty()) {
+            wordPairs = (wordPairsMaster + customWordPairs).filterNot { usedWordPairs.contains(it) }.toMutableList()
+            if (wordPairs.isEmpty()) {
+                usedWordPairs.clear()
+                wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
+            }
+        }
+
+        if (!isImpostorGame) {
+            selectedPair = wordPairs.removeAt(Random.nextInt(wordPairs.size)).also {
+                usedWordPairs.add(it)
+            }
+        }
 
         players.forEach { it.role = Role.CREW }
         assignRole(Role.UNDERCOVER, undercoverCount)

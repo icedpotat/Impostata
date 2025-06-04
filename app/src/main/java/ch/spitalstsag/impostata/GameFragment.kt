@@ -82,6 +82,38 @@ class GameFragment : Fragment() {
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val rootView = view.findViewById<View>(R.id.rootLayout)
+        val scrollContainer = view.findViewById<LinearLayout>(R.id.nameInputsLinearContainer)
+
+        rootView.viewTreeObserver.addOnGlobalLayoutListener {
+            val heightDiff = rootView.rootView.height - rootView.height
+            val isKeyboardOpen = heightDiff > rootView.rootView.height * 0.15
+
+            val existingSpacer = scrollContainer.children.find { it.tag == "keyboardSpacer" }
+
+            if (isKeyboardOpen) {
+                Log.d("Spacer","Activated")
+                if (existingSpacer == null) {
+                    val spacer = View(requireContext()).apply {
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            350
+                        )
+                        tag = "keyboardSpacer"
+                    }
+                    scrollContainer.addView(spacer)
+
+                }
+            } else {
+                existingSpacer?.let { scrollContainer.removeView(it) }
+            }
+        }
+    }
+
+
     private fun initViews(view: View) {
         gameLogic = GameLogic
 
@@ -221,11 +253,32 @@ class GameFragment : Fragment() {
                     columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                     setMargins(8, 8, 8, 8)
                 }
+                setOnFocusChangeListener { v, hasFocus ->
+                    if (hasFocus) {
+                        view?.findViewById<ScrollView>(R.id.nameInputsScrollView)?.post {
+                            view?.findViewById<ScrollView>(R.id.nameInputsScrollView)
+                                ?.smoothScrollTo(0, v.top)
+                        }
+                    }
+                }
             }
 
             grid.addView(et)
         }
 
+        // Add scroll padding view only if needed
+        val scrollContainer = view?.findViewById<LinearLayout>(R.id.nameInputsLinearContainer)
+        scrollContainer?.removeAllViews()
+        scrollContainer?.addView(grid)
+
+        if (selectedPlayerCount > 8) {
+            val spacer = View(requireContext()).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 200
+                )
+            }
+            scrollContainer?.addView(spacer)
+        }
         btnStartGame.visibility = View.VISIBLE
     }
 
@@ -265,7 +318,7 @@ class GameFragment : Fragment() {
         val maxAllowed = selectedPlayerCount / 2 + 1
 
         if (undercover + impostor > maxAllowed) {
-            Toast.makeText(requireContext(), "Maximal ${maxAllowed} Sonderrollen erlaubt.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Maximal $maxAllowed Sonderrollen erlaubt.", Toast.LENGTH_SHORT).show()
             return
         }
 
