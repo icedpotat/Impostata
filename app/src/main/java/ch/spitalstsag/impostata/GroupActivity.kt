@@ -249,46 +249,6 @@ class GroupActivity : AppCompatActivity() {
         return gson.fromJson(json, type)
     }
 
-
-    private fun showEditGroupDialog(groupIndex: Int) {
-        val group = groups[groupIndex]
-
-        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_group, null)
-        val groupNameInput = dialogView.findViewById<EditText>(R.id.groupNameInput)
-        val playersInput = dialogView.findViewById<EditText>(R.id.playersInput) // Comma separated player names
-
-        groupNameInput.setText(group.name)
-        playersInput.setText(group.players.joinToString(", ") { it.name })
-
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("Edit Group")
-            .setView(dialogView)
-            .setPositiveButton("Save") { _, _ ->
-                // Save changes
-                val newName = groupNameInput.text.toString()
-                val newPlayers = playersInput.text.toString()
-                    .split(",")
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-                    .map { Player(it) }
-                    .toMutableList()
-
-                groups[groupIndex] = Group(newName,group.colorHex, newPlayers)
-                saveGroups(this, groups)
-                displayGroups(findViewById(R.id.groupListContainer))
-            }
-            .setNegativeButton("Delete") { _, _ ->
-                // Delete group
-                groups.removeAt(groupIndex)
-                saveGroups(this, groups)
-                displayGroups(findViewById(R.id.groupListContainer))
-            }
-            .setNeutralButton("Cancel", null)
-            .create()
-
-        dialog.show()
-    }
-
     private fun selectGroup(group: Group) {
         // Pass selected group back to caller activity or wherever needed
         val intent = Intent()

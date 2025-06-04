@@ -110,6 +110,14 @@ class GameFragment : Fragment() {
             } else {
                 existingSpacer?.let { scrollContainer.removeView(it) }
             }
+            val focusedView = view.findFocus()
+            if (isKeyboardOpen && focusedView is EditText) {
+                val scrollView = view.findViewById<ScrollView>(R.id.nameInputsScrollView)
+                scrollView?.post {
+                    scrollView.smoothScrollTo(0, focusedView.top - 16)
+                }
+            }
+
         }
     }
 
@@ -252,14 +260,6 @@ class GameFragment : Fragment() {
                     height = ViewGroup.LayoutParams.WRAP_CONTENT
                     columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                     setMargins(8, 8, 8, 8)
-                }
-                setOnFocusChangeListener { v, hasFocus ->
-                    if (hasFocus) {
-                        view?.findViewById<ScrollView>(R.id.nameInputsScrollView)?.post {
-                            view?.findViewById<ScrollView>(R.id.nameInputsScrollView)
-                                ?.smoothScrollTo(0, v.top)
-                        }
-                    }
                 }
             }
 
@@ -502,6 +502,22 @@ class GameFragment : Fragment() {
                 }
 
                 grid.addView(et)
+                // Spacer logic for keyboard scroll room
+                val scrollContainer = view?.findViewById<LinearLayout>(R.id.nameInputsLinearContainer)
+                scrollContainer?.removeAllViews()
+                scrollContainer?.addView(grid)
+
+                if (selectedPlayerCount >= 8) {
+                    val spacer = View(requireContext()).apply {
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            200
+                        )
+                        tag = "keyboardSpacer"
+                    }
+                    scrollContainer?.addView(spacer)
+                }
+
             }
 
             val maxRoles = selectedPlayerCount / 2 + 1
