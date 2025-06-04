@@ -41,7 +41,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.firebase.crashlytics.buildtools)
-    implementation("com.google.code.gson:gson:2.11.0")
+    implementation(libs.gson)
     implementation(libs.androidx.ui.test.android)
     implementation(libs.androidx.room.runtime.android)
     testImplementation(libs.junit)
