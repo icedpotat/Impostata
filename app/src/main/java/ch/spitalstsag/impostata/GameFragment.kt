@@ -27,7 +27,6 @@ import ch.spitalstsag.impostata.GameLogic.players
 
 class GameFragment : Fragment() {
     private enum class GamePhase { SETUP, PLAYING, VOTING, RESULT }
-    private enum class Direction { CLOCKWISE, COUNTERCLOCKWISE }
 
     private lateinit var gameLogic: GameLogic
 
@@ -44,8 +43,8 @@ class GameFragment : Fragment() {
     private lateinit var btnNextPlayer: Button
     private lateinit var votingButtonsContainer: LinearLayout
     private lateinit var voteResultText: TextView
-    private lateinit var ImpostorGuessLayout: ViewGroup
-    private lateinit var ImpostorGuessInput: EditText
+    private lateinit var impostorGuessLayout: ViewGroup
+    private lateinit var impostorGuessInput: EditText
     private lateinit var btnConfirmGuess: Button
     private lateinit var btnContinueVoting: Button
     private lateinit var btnRestartGame: Button
@@ -60,7 +59,7 @@ class GameFragment : Fragment() {
     private lateinit var btnStartGame: Button
     private lateinit var btnSelectGroup: Button
     private lateinit var undercoverCountText: TextView
-    private lateinit var ImpostorCountText: TextView
+    private lateinit var impostorCountText: TextView
 
     private lateinit var btnSettings: ImageButton
 
@@ -93,46 +92,6 @@ class GameFragment : Fragment() {
         return view
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val rootView = view.findViewById<View>(R.id.rootLayout)
-        val scrollContainer = view.findViewById<LinearLayout>(R.id.nameInputsLinearContainer)
-
-        rootView.viewTreeObserver.addOnGlobalLayoutListener {
-            val heightDiff = rootView.rootView.height - rootView.height
-            val isKeyboardOpen = heightDiff > rootView.rootView.height * 0.15
-
-            val existingSpacer = scrollContainer.children.find { it.tag == "keyboardSpacer" }
-
-            if (isKeyboardOpen) {
-                Log.d("Spacer","Activated")
-                if (existingSpacer == null) {
-                    val spacer = View(requireContext()).apply {
-                        layoutParams = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            350
-                        )
-                        tag = "keyboardSpacer"
-                    }
-                    scrollContainer.addView(spacer)
-
-                }
-            } else {
-                existingSpacer?.let { scrollContainer.removeView(it) }
-            }
-            val focusedView = view.findFocus()
-            if (isKeyboardOpen && focusedView is EditText) {
-                val scrollView = view.findViewById<ScrollView>(R.id.nameInputsScrollView)
-                scrollView?.post {
-                    scrollView.smoothScrollTo(0, focusedView.top - 16)
-                }
-            }
-
-        }
-    }
-
-
     private fun initViews(view: View) {
         gameLogic = GameLogic
 
@@ -145,7 +104,7 @@ class GameFragment : Fragment() {
         playerCountLabel = view.findViewById(R.id.playerCountLabel)
 
         undercoverCountText = view.findViewById(R.id.undercoverCountText)
-        ImpostorCountText = view.findViewById(R.id.ImpostorCountText)
+        impostorCountText = view.findViewById(R.id.ImpostorCountText)
 
         btnStartGame = view.findViewById(R.id.btnStartGame)
         nameInputsContainer = view.findViewById(R.id.nameInputsContainer)
@@ -156,8 +115,8 @@ class GameFragment : Fragment() {
         btnNextPlayer = view.findViewById(R.id.btnNextPlayer)
         votingButtonsContainer = view.findViewById(R.id.votingButtonsLayout)
         voteResultText = view.findViewById(R.id.voteResultText)
-        ImpostorGuessLayout = view.findViewById(R.id.ImpostorGuessLayout)
-        ImpostorGuessInput = view.findViewById(R.id.ImpostorGuessInput)
+        impostorGuessLayout = view.findViewById(R.id.ImpostorGuessLayout)
+        impostorGuessInput = view.findViewById(R.id.ImpostorGuessInput)
         btnConfirmGuess = view.findViewById(R.id.btnConfirmGuess)
         btnContinueVoting = view.findViewById(R.id.btnContinueVoting)
         btnRestartGame = view.findViewById(R.id.btnRestartGame)
@@ -181,7 +140,7 @@ class GameFragment : Fragment() {
 
     private fun getRoleCounts(): Triple<Int, Int, Int> {
         val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
-        val impostor = ImpostorCountText.text.toString().toIntOrNull() ?: 0
+        val impostor = impostorCountText.text.toString().toIntOrNull() ?: 0
         val civilian = (selectedPlayerCount - undercover - impostor).coerceAtLeast(0)
         return Triple(undercover, impostor, civilian)
     }
@@ -210,13 +169,13 @@ class GameFragment : Fragment() {
 
                 val maxRoles = selectedPlayerCount / 2 + 1
                 val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
-                val impostor = ImpostorCountText.text.toString().toIntOrNull() ?: 0
+                val impostor = impostorCountText.text.toString().toIntOrNull() ?: 0
 
                 val correctedUndercover = undercover.coerceAtMost(maxRoles)
                 val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
 
                 undercoverCountText.text = correctedUndercover.toString()
-                ImpostorCountText.text = correctedImpostor.toString()
+                impostorCountText.text = correctedImpostor.toString()
 
                 addNameInputs()
                 updateCivilianCount()
@@ -235,8 +194,8 @@ class GameFragment : Fragment() {
 
         btnUndercoverPlus.setOnClickListener { changeRoleCount(undercoverCountText, +1) }
         btnUndercoverMinus.setOnClickListener { changeRoleCount(undercoverCountText, -1) }
-        btnImpostorPlus.setOnClickListener { changeRoleCount(ImpostorCountText, +1) }
-        btnImpostorMinus.setOnClickListener { changeRoleCount(ImpostorCountText, -1) }
+        btnImpostorPlus.setOnClickListener { changeRoleCount(impostorCountText, +1) }
+        btnImpostorMinus.setOnClickListener { changeRoleCount(impostorCountText, -1) }
 
         groupContainer.setOnClickListener { removeGroupView() }
         btnSelectGroup.setOnClickListener {
@@ -364,7 +323,7 @@ class GameFragment : Fragment() {
 
 
         val undercoverCount = undercoverCountText.text.toString().toIntOrNull() ?: 0
-        val impostorCount = ImpostorCountText.text.toString().toIntOrNull() ?: 0
+        val impostorCount = impostorCountText.text.toString().toIntOrNull() ?: 0
 
         if (!gameLogic.setupGame(playerNames, undercoverCount, impostorCount)) {
             Toast.makeText(requireContext(), "Zu viele Undercover/Impostor für diese Spieleranzahl.", Toast.LENGTH_SHORT).show()
@@ -385,7 +344,7 @@ class GameFragment : Fragment() {
         val newCount = (current + delta).coerceAtLeast(0)
 
         if (textView == undercoverCountText) undercoverCountText.text = newCount.toString()
-        if (textView == ImpostorCountText) ImpostorCountText.text = newCount.toString()
+        if (textView == impostorCountText) impostorCountText.text = newCount.toString()
 
         val (undercover, impostor, _) = getRoleCounts()
         val maxAllowed = selectedPlayerCount / 2 + 1
@@ -458,7 +417,7 @@ class GameFragment : Fragment() {
 
 
         if (role == Role.IMPOSTOR) {
-            ImpostorGuessLayout.visibility = View.VISIBLE
+            impostorGuessLayout.visibility = View.VISIBLE
             btnContinueVoting.visibility = View.GONE
             btnConfirmGuess.visibility = View.VISIBLE
         } else if (role == Role.JESTER && ejectedPlayers == 0) {
@@ -467,7 +426,7 @@ class GameFragment : Fragment() {
             btnRestartGame.visibility = View.VISIBLE
             return
         } else {
-            ImpostorGuessLayout.visibility = View.GONE
+            impostorGuessLayout.visibility = View.GONE
             btnContinueVoting.visibility = View.VISIBLE
         }
 
@@ -479,7 +438,7 @@ class GameFragment : Fragment() {
     }
 
     private fun confirmImpostorGuess() {
-        val guess = ImpostorGuessInput.text.toString()
+        val guess = impostorGuessInput.text.toString()
         val correct = gameLogic.checkImpostorGuessAndEndGame(guess)
 
         voteResultText.text = if (correct) {
@@ -489,9 +448,9 @@ class GameFragment : Fragment() {
             "Falsches Wort, u suck lol"
         }
 
-        ImpostorGuessInput.text?.clear()
+        impostorGuessInput.text?.clear()
 
-        ImpostorGuessLayout.visibility = View.GONE
+        impostorGuessLayout.visibility = View.GONE
         btnConfirmGuess.visibility = View.GONE
         if (!correct && !gameLogic.isGameOver()) btnContinueVoting.visibility = View.VISIBLE else btnRestartGame.visibility = View.VISIBLE
     }
@@ -500,7 +459,7 @@ class GameFragment : Fragment() {
         gameLogic.resetGame()
         btnRestartGame.visibility = View.GONE
         setGamePhase(GamePhase.SETUP)
-        ImpostorGuessInput.setText("")
+        impostorGuessInput.setText("")
     }
 
     private fun removeGroupView() {
@@ -515,13 +474,13 @@ class GameFragment : Fragment() {
         // Clamp roles
         val maxRoles = selectedPlayerCount / 2 + 1
         val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
-        val impostor = ImpostorCountText.text.toString().toIntOrNull() ?: 0
+        val impostor = impostorCountText.text.toString().toIntOrNull() ?: 0
 
         val correctedUndercover = undercover.coerceAtMost(maxRoles)
         val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
 
         undercoverCountText.text = correctedUndercover.toString()
-        ImpostorCountText.text = correctedImpostor.toString()
+        impostorCountText.text = correctedImpostor.toString()
 
         addNameInputs()
         updateCivilianCount()
@@ -669,13 +628,13 @@ class GameFragment : Fragment() {
 
             val maxRoles = selectedPlayerCount / 2 + 1
             val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
-            val impostor = ImpostorCountText.text.toString().toIntOrNull() ?: 0
+            val impostor = impostorCountText.text.toString().toIntOrNull() ?: 0
 
             val correctedUndercover = undercover.coerceAtMost(maxRoles)
             val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
 
             undercoverCountText.text = correctedUndercover.toString()
-            ImpostorCountText.text = correctedImpostor.toString()
+            impostorCountText.text = correctedImpostor.toString()
 
             updateCivilianCount()
             updateRoleButtonsVisibility()
