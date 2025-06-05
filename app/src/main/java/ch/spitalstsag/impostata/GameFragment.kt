@@ -7,6 +7,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +20,7 @@ import ch.spitalstsag.impostata.model.Role
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.appcompat.app.AlertDialog
 
 
 class GameFragment : Fragment() {
@@ -242,19 +244,47 @@ class GameFragment : Fragment() {
         }
     }
 
+    private fun showNameEditDialog(initialName: String, onNameConfirmed: (String) -> Unit) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_name, null)
+        val input = dialogView.findViewById<EditText>(R.id.editNameInput).apply {
+            setText(initialName)
+            setSelection(initialName.length)
+            requestFocus()
+        }
+
+
+        val dialog = AlertDialog.Builder(requireContext(), R.style.PixelDialog)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.btnAdd).setOnClickListener {
+            onNameConfirmed(input.text.toString())
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.btnCancel).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.setOnShowListener {
+            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT)
+        }
+
+        dialog.show()
+    }
+
+
+
+
+
     private fun addNameInputs() {
-        val grid = nameInputsContainer as GridLayout
-        grid.removeAllViews()
+        nameInputsContainer.removeAllViews()
 
         for (i in 0 until selectedPlayerCount) {
-            val et = EditText(requireContext()).apply {
-                hint = "Spieler ${i + 1}"
-                inputType = InputType.TYPE_CLASS_TEXT
-                setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
-                setHintTextColor(Color.GRAY)
-                backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.pixel_text))
-                typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
-                textSize = 14f
+            val playerSlot = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
                 layoutParams = GridLayout.LayoutParams().apply {
                     width = 0
                     height = ViewGroup.LayoutParams.WRAP_CONTENT
@@ -263,24 +293,54 @@ class GameFragment : Fragment() {
                 }
             }
 
-            grid.addView(et)
-        }
-
-        // Add scroll padding view only if needed
-        val scrollContainer = view?.findViewById<LinearLayout>(R.id.nameInputsLinearContainer)
-        scrollContainer?.removeAllViews()
-        scrollContainer?.addView(grid)
-
-        if (selectedPlayerCount > 8) {
-            val spacer = View(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, 200
-                )
+            val nameText = TextView(requireContext()).apply {
+                text = "Spieler ${i + 1}"
+                ellipsize = TextUtils.TruncateAt.END
+                maxLines = 1
+                isSingleLine = true
+                textSize = 14f
+                typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
+                setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             }
-            scrollContainer?.addView(spacer)
+
+            val editBtn = Button(requireContext(), null, 0, R.style.PixelButton).apply {
+                text = "Edit️"
+                typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
+                setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
+                textSize = 12f
+                minWidth = 0
+                minHeight = 0
+                setPadding(0, 0, 0, 0)
+                layoutParams = LinearLayout.LayoutParams(150, 55).apply {
+                    marginStart = 4
+                }
+                visibility = View.GONE
+            }
+
+
+            nameText.setOnClickListener {
+                editBtn.visibility = if (editBtn.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+            }
+
+            editBtn.setOnClickListener {
+                val currentName = nameText.text.toString()
+
+                showNameEditDialog(currentName) { newName ->
+                    nameText.text = newName
+                }
+            }
+
+
+            playerSlot.addView(nameText)
+            playerSlot.addView(editBtn)
+            nameInputsContainer.addView(playerSlot)
         }
+
         btnStartGame.visibility = View.VISIBLE
     }
+
+
 
 
 
@@ -462,37 +522,30 @@ class GameFragment : Fragment() {
                 }
                 Toast.makeText(requireContext(), "Wörter erfolgreich importiert.", Toast.LENGTH_SHORT).show()
             }
-        } else if (requestCode == REQUEST_CODE_SELECT_GROUP && resultCode == Activity.RESULT_OK) {
+        }else if (requestCode == REQUEST_CODE_SELECT_GROUP && resultCode == Activity.RESULT_OK) {
             val groupName = data?.getStringExtra("selectedGroupName")
-            val playerNames = data?.getStringArrayListExtra("selectedGroupPlayers")
+            val playerNames = data?.getStringArrayListExtra("selectedGroupPlayers") ?: arrayListOf()
 
             Log.d("TEST", "Group Name: $groupName, Player Names: $playerNames")
 
             groupContainer.removeAllViews()
             val groupView = LayoutInflater.from(requireContext()).inflate(R.layout.item_group, groupContainer, false)
             groupView.findViewById<TextView>(R.id.groupNameText).text = groupName
-            groupView.findViewById<TextView>(R.id.playerListText).text = playerNames.toString()
+            groupView.findViewById<TextView>(R.id.playerListText).text = playerNames.joinToString(", ")
             groupView.findViewById<Button>(R.id.editGroupBtn).visibility = View.GONE
+            groupContainer.addView(groupView)
 
             playerCountLabel.visibility = View.GONE
             playerCountSlider.visibility = View.GONE
-            groupContainer.addView(groupView)
 
-            selectedPlayerCount = playerNames?.size ?: 0
+            selectedPlayerCount = playerNames.size
             playerCountLabel.text = "$selectedPlayerCount Spieler"
-            val grid = nameInputsContainer as GridLayout
-            grid.removeAllViews()
+            nameInputsContainer.removeAllViews()
 
-            playerNames?.forEachIndexed { i, name ->
-                val et = EditText(requireContext()).apply {
-                    setText(name)
-                    hint = "Spieler ${i + 1}"
-                    inputType = InputType.TYPE_CLASS_TEXT
-                    setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
-                    setHintTextColor(Color.GRAY)
-                    backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.pixel_text))
-                    typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
-                    textSize = 14f
+            playerNames.forEachIndexed { i, name ->
+                val playerSlot = LinearLayout(requireContext()).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = android.view.Gravity.CENTER_VERTICAL
                     layoutParams = GridLayout.LayoutParams().apply {
                         width = 0
                         height = ViewGroup.LayoutParams.WRAP_CONTENT
@@ -501,23 +554,48 @@ class GameFragment : Fragment() {
                     }
                 }
 
-                grid.addView(et)
-                // Spacer logic for keyboard scroll room
-                val scrollContainer = view?.findViewById<LinearLayout>(R.id.nameInputsLinearContainer)
-                scrollContainer?.removeAllViews()
-                scrollContainer?.addView(grid)
-
-                if (selectedPlayerCount >= 8) {
-                    val spacer = View(requireContext()).apply {
-                        layoutParams = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            200
-                        )
-                        tag = "keyboardSpacer"
-                    }
-                    scrollContainer?.addView(spacer)
+                val nameText = TextView(requireContext()).apply {
+                    text = name
+                    ellipsize = TextUtils.TruncateAt.END
+                    maxLines = 1
+                    isSingleLine = true
+                    textSize = 14f
+                    typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
+                    setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
+                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
                 }
 
+                val editBtn = Button(requireContext(), null, 0, R.style.PixelButton).apply {
+                    text = "Edit️"
+                    typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
+                    setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
+                    textSize = 12f
+                    minWidth = 0
+                    minHeight = 0
+                    setPadding(0, 0, 0, 0)
+                    layoutParams = LinearLayout.LayoutParams(150, 55).apply {
+                        marginStart = 4
+                    }
+                    visibility = View.GONE
+                }
+
+
+                nameText.setOnClickListener {
+                    editBtn.visibility = if (editBtn.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+                }
+
+                editBtn.setOnClickListener {
+                    val currentName = nameText.text.toString()
+
+                    showNameEditDialog(currentName) { newName ->
+                        nameText.text = newName
+                    }
+                }
+
+
+                playerSlot.addView(nameText)
+                playerSlot.addView(editBtn)
+                nameInputsContainer.addView(playerSlot)
             }
 
             val maxRoles = selectedPlayerCount / 2 + 1
@@ -533,8 +611,8 @@ class GameFragment : Fragment() {
             updateCivilianCount()
             updateRoleButtonsVisibility()
             btnStartGame.visibility = View.VISIBLE
-
         }
+
     }
     override fun onResume() {
         super.onResume()

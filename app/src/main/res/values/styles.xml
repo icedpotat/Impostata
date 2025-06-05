@@ -28,4 +28,9 @@
         <item name="android:gravity">end</item>
     </style>
 
+    <style name="PixelDialog" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:textColor">@color/pixel_text</item>
+        <item name="android:fontFamily">@font/pixel_font</item>
+    </style>
+
 </resources>
