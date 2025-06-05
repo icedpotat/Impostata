@@ -21,6 +21,8 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.edit
+import ch.spitalstsag.impostata.GameLogic.players
 
 
 class GameFragment : Fragment() {
@@ -49,7 +51,6 @@ class GameFragment : Fragment() {
     private lateinit var btnRestartGame: Button
     private lateinit var playerCountLabel: TextView
     private lateinit var playerCountSlider: SeekBar
-    private lateinit var importButton: Button
     private lateinit var btnUndercoverPlus: Button
     private lateinit var btnUndercoverMinus: Button
     private lateinit var btnImpostorPlus: Button
@@ -60,6 +61,8 @@ class GameFragment : Fragment() {
     private lateinit var btnSelectGroup: Button
     private lateinit var undercoverCountText: TextView
     private lateinit var ImpostorCountText: TextView
+
+    private lateinit var btnSettings: ImageButton
 
     private var selectedPlayerCount = 3
     private var currentPlayerIndex = 0
@@ -74,6 +77,12 @@ class GameFragment : Fragment() {
         addNameInputs()
         updateCivilianCount()
         updateRoleButtonsVisibility()
+
+        val prefs = requireContext().getSharedPreferences("impostata_prefs", Context.MODE_PRIVATE)
+        GameLogic.chanceAllImpostor = prefs.getInt("chance_all_impostor", 1)
+        GameLogic.chanceNoImpostor = prefs.getInt("chance_no_impostor", 1)
+        GameLogic.chanceJester = prefs.getInt("chance_jester", 1)
+
 
         view.setOnTouchListener { _, _ ->
             val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
@@ -159,7 +168,8 @@ class GameFragment : Fragment() {
         civilianCountText = view.findViewById(R.id.civilianCountText)
         groupContainer = view.findViewById(R.id.selectedGroupContainer)
         btnSelectGroup = view.findViewById(R.id.btnSelectGroup)
-        importButton = view.findViewById(R.id.importWordsButton)
+
+        btnSettings = view.findViewById(R.id.settingsButton)
     }
 
     private fun setGamePhase(phase: GamePhase) {
@@ -216,15 +226,6 @@ class GameFragment : Fragment() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-
-        importButton.setOnClickListener {
-            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                type = "text/*"
-                addCategory(Intent.CATEGORY_OPENABLE)
-            }
-            startActivityForResult(intent, IMPORT_WORDS_REQUEST_CODE)
-        }
-
         btnStartGame.setOnClickListener { startGame() }
         btnShowWord.setOnClickListener { showWord() }
         btnNextPlayer.setOnClickListener { nextPlayer() }
@@ -242,6 +243,11 @@ class GameFragment : Fragment() {
             val intent = Intent(requireContext(), GroupActivity::class.java)
             startActivityForResult(intent, REQUEST_CODE_SELECT_GROUP)
         }
+
+        btnSettings.setOnClickListener {
+            showSettingsDialog()
+        }
+
     }
 
     private fun showNameEditDialog(initialName: String, onNameConfirmed: (String) -> Unit) {
@@ -448,11 +454,18 @@ class GameFragment : Fragment() {
 
         val playerName = gameLogic.players[index].name
         voteResultText.text = "$playerName wurde rausgeworfen.\n\nRolle: $role"
+        val ejectedPlayers = players.count { !it.isEjected }
+
 
         if (role == Role.IMPOSTOR) {
             ImpostorGuessLayout.visibility = View.VISIBLE
             btnContinueVoting.visibility = View.GONE
             btnConfirmGuess.visibility = View.VISIBLE
+        } else if (role == Role.JESTER && ejectedPlayers == 0) {
+            voteResultText.append("\n\nDer Jester wurde erfolgreich rausgeworfen! Er gewinnt alleine.")
+            btnContinueVoting.visibility = View.GONE
+            btnRestartGame.visibility = View.VISIBLE
+            return
         } else {
             ImpostorGuessLayout.visibility = View.GONE
             btnContinueVoting.visibility = View.VISIBLE
@@ -514,6 +527,52 @@ class GameFragment : Fragment() {
         updateCivilianCount()
         updateRoleButtonsVisibility()
     }
+
+    private fun showSettingsDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_settings, null)
+
+        val chanceAll = dialogView.findViewById<EditText>(R.id.editChanceAllImpostors)
+        val chanceNone = dialogView.findViewById<EditText>(R.id.editChanceNoImpostors)
+        val chanceJester = dialogView.findViewById<EditText>(R.id.editChanceJester)
+        val importBtn = dialogView.findViewById<Button>(R.id.btnImportWords)
+
+        val prefs = requireContext().getSharedPreferences("impostata_prefs", Context.MODE_PRIVATE)
+        chanceAll.setText(prefs.getInt("chance_all_impostor", 1).toString())
+        chanceNone.setText(prefs.getInt("chance_no_impostor", 1).toString())
+        chanceJester.setText(prefs.getInt("chance_jester", 1).toString())
+
+        val dialog = AlertDialog.Builder(requireContext(), R.style.PixelDialog)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.btnAdd).setOnClickListener {
+            prefs.edit {
+                putInt("chance_all_impostor", chanceAll.text.toString().toIntOrNull() ?: 0)
+                putInt("chance_no_impostor", chanceNone.text.toString().toIntOrNull() ?: 0)
+                putInt("chance_jester", chanceJester.text.toString().toIntOrNull() ?: 0)            }
+
+            GameLogic.chanceNoImpostor = prefs.getInt("chance_no_impostor", 1)
+            GameLogic.chanceAllImpostor = prefs.getInt("chance_all_impostor", 1)
+            GameLogic.chanceJester = prefs.getInt("chance_jester", 1)
+
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.btnCancel).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        importBtn.setOnClickListener {
+            dialog.dismiss()
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                type = "text/*"
+                addCategory(Intent.CATEGORY_OPENABLE)
+            }
+            startActivityForResult(intent, IMPORT_WORDS_REQUEST_CODE)        }
+
+        dialog.show()
+    }
+
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

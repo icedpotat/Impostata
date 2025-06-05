@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/pixel_panel">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chance für alle Impostors"
+        android:textColor="@color/pixel_text"
+        android:fontFamily="@font/pixel_font"
+        android:textSize="14sp"/>
+
+    <EditText
+        android:id="@+id/editChanceAllImpostors"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="z.B. 1"
+        android:inputType="number"
+        android:textColor="@color/pixel_text"
+        android:textColorHint="#888888"
+        android:fontFamily="@font/pixel_font"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chance für keine Impostors"
+        android:textColor="@color/pixel_text"
+        android:fontFamily="@font/pixel_font"
+        android:layout_marginTop="12dp"
+        android:textSize="14sp"/>
+
+    <EditText
+        android:id="@+id/editChanceNoImpostors"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="z.B. 1"
+        android:inputType="number"
+        android:textColor="@color/pixel_text"
+        android:textColorHint="#888888"
+        android:fontFamily="@font/pixel_font"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chance für einen Jester"
+        android:textColor="@color/pixel_text"
+        android:fontFamily="@font/pixel_font"
+        android:layout_marginTop="12dp"
+        android:textSize="14sp"/>
+
+    <EditText
+        android:id="@+id/editChanceJester"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="z.B. 1"
+        android:inputType="number"
+        android:textColor="@color/pixel_text"
+        android:textColorHint="#888888"
+        android:fontFamily="@font/pixel_font"/>
+
+    <Button
+        android:id="@+id/btnImportWords"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Wörter importieren"
+        style="@style/PixelButton"
+        android:layout_marginTop="12dp"/>
+
+    <include layout="@layout/dialog_buttons_horizontal"/>
+</LinearLayout>

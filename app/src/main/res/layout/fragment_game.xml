@@ -216,14 +216,16 @@
             android:text="Spiel starten"
             android:visibility="gone" />
 
-        <Button
-            android:id="@+id/importWordsButton"
-            style="@style/PixelButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="4dp"
-            android:text="Wörter importieren" />
+        <ImageButton
+            android:id="@+id/settingsButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_settings"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_gravity="end|bottom"
+            android:contentDescription="Settings"
+            android:padding="8dp"
+            android:layout_marginTop="8dp"/>
     </LinearLayout>
 
 
@@ -372,5 +374,6 @@
             android:text="Neues Spiel starten"
             android:visibility="gone" />
     </LinearLayout>
+
 </LinearLayout>
 
