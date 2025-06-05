@@ -294,6 +294,8 @@ class GameFragment : Fragment() {
             }
 
             val nameText = TextView(requireContext()).apply {
+                id = View.generateViewId() // or use a static ID if preferred
+                tag = "playerNameText"
                 text = "Spieler ${i + 1}"
                 ellipsize = TextUtils.TruncateAt.END
                 maxLines = 1
@@ -346,9 +348,14 @@ class GameFragment : Fragment() {
 
     private fun startGame() {
         val playerNames = nameInputsContainer.children
-            .filterIsInstance<EditText>()
-            .map { it.text.toString() }
+            .mapNotNull { row ->
+                row.findViewWithTag<TextView>("playerNameText")?.text?.toString()?.trim()
+            }
+            .filter { it.isNotEmpty() }
             .toList()
+
+        Log.d("PlayerNames",playerNames.toString())
+
 
         val undercoverCount = undercoverCountText.text.toString().toIntOrNull() ?: 0
         val impostorCount = ImpostorCountText.text.toString().toIntOrNull() ?: 0
@@ -528,6 +535,8 @@ class GameFragment : Fragment() {
 
             Log.d("TEST", "Group Name: $groupName, Player Names: $playerNames")
 
+            selectedPlayerCount = playerNames.size
+
             groupContainer.removeAllViews()
             val groupView = LayoutInflater.from(requireContext()).inflate(R.layout.item_group, groupContainer, false)
             groupView.findViewById<TextView>(R.id.groupNameText).text = groupName
@@ -538,7 +547,6 @@ class GameFragment : Fragment() {
             playerCountLabel.visibility = View.GONE
             playerCountSlider.visibility = View.GONE
 
-            selectedPlayerCount = playerNames.size
             playerCountLabel.text = "$selectedPlayerCount Spieler"
             nameInputsContainer.removeAllViews()
 
@@ -555,6 +563,8 @@ class GameFragment : Fragment() {
                 }
 
                 val nameText = TextView(requireContext()).apply {
+                    id = View.generateViewId() // or use a static ID if preferred
+                    tag = "playerNameText"
                     text = name
                     ellipsize = TextUtils.TruncateAt.END
                     maxLines = 1
