@@ -6,6 +6,8 @@ import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,9 +20,12 @@ import androidx.fragment.app.Fragment
 import ch.spitalstsag.impostata.model.Role
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.core.content.res.ResourcesCompat
 import ch.spitalstsag.impostata.GameLogic.players
 import androidx.core.view.isVisible
+import ch.spitalstsag.impostata.model.Player
 
 
 class GameFragment : Fragment() {
@@ -367,6 +372,27 @@ class GameFragment : Fragment() {
             Toast.makeText(requireContext(),"Schaue dir zuerst das Wort an ;)", Toast.LENGTH_LONG).show()
         }
     }
+    private fun showGameStartDialog() {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_game_start, null)
+        val messageView = dialogView.findViewById<TextView>(R.id.dialogMessage)
+
+        val activePlayers = gameLogic.players.filter { !it.isEjected }
+        if (activePlayers.isEmpty()) return
+
+        val starter = activePlayers.random().name
+        val direction = if ((0..1).random() == 0) "Uhrzeigersinn" else "Gegen den Uhrzeigersinn"
+        messageView.text = "$starter beginnt.\n\nDie Runge geht in Richtung: \n$direction"
+
+        val dialog = AlertDialog.Builder(requireContext(), R.style.PixelDialog)
+            .setView(dialogView)
+            .setCancelable(false)
+            .show()
+
+        dialogView.findViewById<Button>(R.id.okButton)?.setOnClickListener {
+            dialog.dismiss()
+        }
+    }
+
 
     private fun startVoting() {
         if (gameLogic.gameEnded) return
@@ -375,16 +401,7 @@ class GameFragment : Fragment() {
 
         votingButtonsContainer.removeAllViews()
 
-        val activePlayers = gameLogic.players.filter { !it.isEjected }
-        val starter = activePlayers.random().name
-        val direction = if ((0..1).random() == 0) "↪ (Uhrzeigersinn)" else "↩ (Gegen den Uhrzeigersinn)"
-
-        AlertDialog.Builder(requireContext(),R.style.PixelDialog)
-            .setTitle("Spielstart")
-            .setMessage("$starter beginnt.\nRichtung: $direction")
-            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-            .setCancelable(false)
-            .show()
+        showGameStartDialog()
 
 
 
