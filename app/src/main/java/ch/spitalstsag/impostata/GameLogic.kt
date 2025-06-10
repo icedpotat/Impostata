@@ -1,6 +1,8 @@
 package ch.spitalstsag.impostata
 
+import android.content.Context
 import android.util.Log
+import androidx.core.content.ContentProviderCompat.requireContext
 import ch.spitalstsag.impostata.model.Player
 import ch.spitalstsag.impostata.model.Role
 import ch.spitalstsag.impostata.model.WordPair
@@ -8,14 +10,8 @@ import kotlinx.coroutines.selects.select
 import kotlin.random.Random
 
 object GameLogic {
+    private val wordPairsMaster = mutableListOf<WordPair>()
 
-    private val wordPairsMaster = mutableListOf(
-        WordPair("Bibliothek", "Buchhandlung"),
-        WordPair("Zahnbürste", "Kamm"),
-        WordPair("Fernseher", "Radio"),
-        WordPair("Post", "Paketdienst"),
-        WordPair("Teller", "Pfanne")
-    )
     private var wordPairs = mutableListOf<WordPair>()
     private val usedWordPairs = mutableListOf<WordPair>()
     private val customWordPairs = mutableListOf<WordPair>()
@@ -32,6 +28,20 @@ object GameLogic {
     var chanceNoImpostor = 1
     var chanceAllImpostor = 1
     var chanceJester = 1
+
+    fun initWordPairs(context: Context) {
+        if (wordPairsMaster.isEmpty()) {
+            wordPairsMaster += context.assets.open("word_pairs.txt")
+                .bufferedReader()
+                .lineSequence()
+                .mapNotNull { line ->
+                    val parts = line.split(',')
+                    if (parts.size == 2) WordPair(parts[0].trim(), parts[1].trim()) else null
+                }
+                .toList()
+        }
+    }
+
 
 
 

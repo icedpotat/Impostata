@@ -3,6 +3,7 @@ package ch.spitalstsag.impostata
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -10,6 +11,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +22,7 @@ import androidx.fragment.app.Fragment
 import ch.spitalstsag.impostata.model.Role
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContentProviderCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.content.res.ResourcesCompat
@@ -42,8 +45,6 @@ class GameFragment : Fragment() {
 
     private lateinit var nameInputsContainer: GridLayout
     private lateinit var currentPlayerText: TextView
-    private lateinit var btnShowWord: Button
-    private lateinit var wordDisplayLayout: ViewGroup
 
     private lateinit var wordText: TextView
     private lateinit var btnNextPlayer: Button
@@ -76,6 +77,8 @@ class GameFragment : Fragment() {
     private val IMPORT_WORDS_REQUEST_CODE = 1001
     private val REQUEST_CODE_SELECT_GROUP = 2001
 
+    //TODO: Deprecated members
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_game, container, false)
         initViews(view)
@@ -83,7 +86,9 @@ class GameFragment : Fragment() {
         addNameInputs()
         updateCivilianCount()
         updateRoleButtonsVisibility()
-        InitFlipAnimation(view)
+        initFlipAnimation()
+
+        GameLogic.initWordPairs(requireContext())
 
         val prefs = requireContext().getSharedPreferences("impostata_prefs", Context.MODE_PRIVATE)
         GameLogic.chanceAllImpostor = prefs.getInt("chance_all_impostor", 1)
@@ -146,6 +151,7 @@ class GameFragment : Fragment() {
         return Triple(undercover, impostor, civilian)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateCivilianCount() {
         val (_, _, civilian) = getRoleCounts()
         civilianCountText.text = "Crew: $civilian"
@@ -179,6 +185,7 @@ class GameFragment : Fragment() {
 
     private fun setupListeners() {
         playerCountSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            @SuppressLint("SetTextI18n")
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 selectedPlayerCount = progress + 3
                 playerCountLabel.text = "$selectedPlayerCount Spieler"
@@ -341,6 +348,7 @@ class GameFragment : Fragment() {
         updateRoleButtonsVisibility()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateCurrentPlayer() {
         if (currentPlayerIndex < gameLogic.players.size) {
             val player = gameLogic.players[currentPlayerIndex]
@@ -372,6 +380,7 @@ class GameFragment : Fragment() {
             Toast.makeText(requireContext(),"Schaue dir zuerst das Wort an ;)", Toast.LENGTH_LONG).show()
         }
     }
+    @SuppressLint("SetTextI18n")
     private fun showGameStartDialog() {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_game_start, null)
         val messageView = dialogView.findViewById<TextView>(R.id.dialogMessage)
@@ -403,18 +412,29 @@ class GameFragment : Fragment() {
 
         showGameStartDialog()
 
-
-
         gameLogic.players.forEachIndexed { index, player ->
             if (!player.isEjected) {
-                Button(requireContext()).apply {
+                val voteButton = Button(ContextThemeWrapper(requireContext(), R.style.PixelButton)).apply {
                     text = player.name
+                    typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
+                    setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
+                    textSize = 14f
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        setMargins(0, 8, 0, 0)
+                    }
+
                     setOnClickListener { resolveVote(index) }
-                }.also { votingButtonsContainer.addView(it) }
+                }
+                votingButtonsContainer.addView(voteButton)
+
             }
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun resolveVote(index: Int) {
         setGamePhase(GamePhase.RESULT)
 
@@ -533,7 +553,7 @@ class GameFragment : Fragment() {
     }
 
 
-    private fun InitFlipAnimation(view: View) {
+    private fun initFlipAnimation() {
         val scale = requireContext().resources.displayMetrics.density
         cardFront.cameraDistance = 8000 * scale
         cardBack.cameraDistance = 8000 * scale
@@ -581,6 +601,8 @@ class GameFragment : Fragment() {
 
 
 
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("SetTextI18n")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
