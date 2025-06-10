@@ -110,9 +110,9 @@ object GameLogic {
         val jesterWord = selectedPair?.crewWord
         return when (getRoleForPlayer(index)) {
             Role.CREW -> selectedPair?.crewWord
-            Role.JESTER -> "Du bist Jester. Werde erfolgreich als erstes herausgeworfen. Das Wort ist: $jesterWord"
+            Role.JESTER -> "Du bist Jester. Das Wort ist: $jesterWord"
             Role.UNDERCOVER -> selectedPair?.undercoverWord
-            Role.IMPOSTOR -> "Du bist der Impostor. Finde heraus, welches Wort die anderen meinen!"
+            Role.IMPOSTOR -> "Du bist der Impostor."
             else -> null
         }
     }

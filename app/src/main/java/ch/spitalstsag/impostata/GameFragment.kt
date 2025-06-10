@@ -1,5 +1,8 @@
 package ch.spitalstsag.impostata
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -32,11 +35,14 @@ class GameFragment : Fragment() {
     private lateinit var gameLayout: ViewGroup
     private lateinit var votingLayout: ViewGroup
     private lateinit var resultLayout: ViewGroup
+    private lateinit var cardFront: View
+    private lateinit var cardBack: View
 
     private lateinit var nameInputsContainer: GridLayout
     private lateinit var currentPlayerText: TextView
     private lateinit var btnShowWord: Button
     private lateinit var wordDisplayLayout: ViewGroup
+
     private lateinit var wordText: TextView
     private lateinit var btnNextPlayer: Button
     private lateinit var votingButtonsContainer: LinearLayout
@@ -63,6 +69,7 @@ class GameFragment : Fragment() {
 
     private var selectedPlayerCount = 3
     private var currentPlayerIndex = 0
+    private var flippedOnce = 0
 
     private val IMPORT_WORDS_REQUEST_CODE = 1001
     private val REQUEST_CODE_SELECT_GROUP = 2001
@@ -74,6 +81,7 @@ class GameFragment : Fragment() {
         addNameInputs()
         updateCivilianCount()
         updateRoleButtonsVisibility()
+        InitFlipAnimation(view)
 
         val prefs = requireContext().getSharedPreferences("impostata_prefs", Context.MODE_PRIVATE)
         GameLogic.chanceAllImpostor = prefs.getInt("chance_all_impostor", 1)
@@ -107,8 +115,10 @@ class GameFragment : Fragment() {
         btnStartGame = view.findViewById(R.id.btnStartGame)
         nameInputsContainer = view.findViewById(R.id.nameInputsContainer)
         currentPlayerText = view.findViewById(R.id.currentPlayerText)
-        btnShowWord = view.findViewById(R.id.btnShowWord)
-        wordDisplayLayout = view.findViewById(R.id.wordDisplayLayout)
+        //btnShowWord = view.findViewById(R.id.btnShowWord)
+        //wordDisplayLayout = view.findViewById(R.id.wordDisplayLayout)
+        cardFront = view.findViewById<View>(R.id.cardFront)
+        cardBack = view.findViewById<View>(R.id.cardBack)
         wordText = view.findViewById(R.id.wordText)
         btnNextPlayer = view.findViewById(R.id.btnNextPlayer)
         votingButtonsContainer = view.findViewById(R.id.votingButtonsLayout)
@@ -189,7 +199,7 @@ class GameFragment : Fragment() {
         })
 
         btnStartGame.setOnClickListener { startGame() }
-        btnShowWord.setOnClickListener { showWord() }
+        //btnShowWord.setOnClickListener { showWord() }
         btnNextPlayer.setOnClickListener { nextPlayer() }
         btnConfirmGuess.setOnClickListener { confirmImpostorGuess() }
         btnContinueVoting.setOnClickListener { startVoting() }
@@ -343,8 +353,8 @@ class GameFragment : Fragment() {
     private fun updateCurrentPlayer() {
         if (currentPlayerIndex < gameLogic.players.size) {
             val player = gameLogic.players[currentPlayerIndex]
-            currentPlayerText.text = "Gerät an: ${player.name}"
-            wordDisplayLayout.visibility = View.GONE
+            currentPlayerText.text = "Gerät an: \n${player.name}"
+            //wordDisplayLayout.visibility = View.GONE
         } else {
             startVoting()
         }
@@ -353,12 +363,23 @@ class GameFragment : Fragment() {
     private fun showWord() {
         val word = gameLogic.getWordForPlayer(currentPlayerIndex)
         wordText.text = word ?: "Fehler: Kein Wort gefunden"
-        wordDisplayLayout.visibility = View.VISIBLE
+        //wordDisplayLayout.visibility = View.VISIBLE
     }
 
     private fun nextPlayer() {
-        currentPlayerIndex++
-        updateCurrentPlayer()
+        if (flippedOnce == 1) {
+            flippedOnce = 0
+            currentPlayerIndex++
+
+            cardBack.visibility = View.GONE
+            cardFront.visibility = View.VISIBLE
+            cardFront.rotationY = 0f
+            cardBack.rotationY = 0f
+
+            updateCurrentPlayer()
+        } else {
+            Toast.makeText(requireContext(),"Schaue dir zuerst das Wort an ;)", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun startVoting() {
@@ -499,6 +520,53 @@ class GameFragment : Fragment() {
             startActivityForResult(intent, IMPORT_WORDS_REQUEST_CODE)        }
 
         dialog.show()
+    }
+
+
+    private fun InitFlipAnimation(view: View) {
+        val scale = requireContext().resources.displayMetrics.density
+        cardFront.cameraDistance = 8000 * scale
+        cardBack.cameraDistance = 8000 * scale
+
+        val flipOut = ObjectAnimator.ofFloat(cardFront, "rotationX", 0f, 90f)
+        val flipIn = ObjectAnimator.ofFloat(cardBack, "rotationX", -90f, 0f)
+        flipOut.duration = 300
+        flipIn.duration = 300
+
+        val flipBackOut = ObjectAnimator.ofFloat(cardBack, "rotationX", 0f, 90f)
+        val flipBackIn = ObjectAnimator.ofFloat(cardFront, "rotationX", -90f, 0f)
+        flipBackOut.duration = 300
+        flipBackIn.duration = 300
+
+
+        cardFront.setOnClickListener {
+            flippedOnce = 1
+            val word = GameLogic.getWordForPlayer(currentPlayerIndex)
+            wordText.text = word ?: "Fehler: Kein Wort"
+
+            flipOut.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    cardFront.visibility = View.GONE
+                    cardBack.visibility = View.VISIBLE
+                    flipIn.start()
+                }
+            })
+
+            flipOut.start()
+        }
+
+        cardBack.setOnClickListener {
+            flipBackOut.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    cardBack.visibility = View.GONE
+                    cardFront.visibility = View.VISIBLE
+                    flipBackIn.start()
+                }
+            })
+
+            flipBackOut.start()
+        }
+
     }
 
 
