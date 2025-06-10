@@ -3,10 +3,7 @@ package ch.spitalstsag.impostata
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
-import android.text.InputType
 import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
@@ -23,6 +20,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.edit
 import ch.spitalstsag.impostata.GameLogic.players
+import androidx.core.view.isVisible
 
 
 class GameFragment : Fragment() {
@@ -161,25 +159,30 @@ class GameFragment : Fragment() {
         btnImpostorMinus.visibility = if ((undercover == 0 && impostor == 1) || impostor == 0) View.INVISIBLE else View.VISIBLE
     }
 
+    private fun updateRoleCountsAndClamping() {
+        val maxRoles = selectedPlayerCount / 2 + 1
+
+        val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
+        val impostor = impostorCountText.text.toString().toIntOrNull() ?: 0
+
+        val correctedUndercover = undercover.coerceAtMost(maxRoles)
+        val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
+
+        undercoverCountText.text = correctedUndercover.toString()
+        impostorCountText.text = correctedImpostor.toString()
+
+        updateCivilianCount()
+        updateRoleButtonsVisibility()
+    }
+
     private fun setupListeners() {
         playerCountSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 selectedPlayerCount = progress + 3
                 playerCountLabel.text = "$selectedPlayerCount Spieler"
 
-                val maxRoles = selectedPlayerCount / 2 + 1
-                val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
-                val impostor = impostorCountText.text.toString().toIntOrNull() ?: 0
-
-                val correctedUndercover = undercover.coerceAtMost(maxRoles)
-                val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
-
-                undercoverCountText.text = correctedUndercover.toString()
-                impostorCountText.text = correctedImpostor.toString()
-
+                updateRoleCountsAndClamping()
                 addNameInputs()
-                updateCivilianCount()
-                updateRoleButtonsVisibility()
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
@@ -223,8 +226,13 @@ class GameFragment : Fragment() {
             .create()
 
         dialogView.findViewById<Button>(R.id.btnAdd).setOnClickListener {
-            onNameConfirmed(input.text.toString())
-            dialog.dismiss()
+            val name = input.text.toString().trim()
+            if (name.isNotEmpty()) {
+                onNameConfirmed(name)
+                dialog.dismiss()
+            } else {
+                Toast.makeText(requireContext(), "Bitte einen gültigen Namen eingeben.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         dialogView.findViewById<Button>(R.id.btnCancel).setOnClickListener {
@@ -240,6 +248,33 @@ class GameFragment : Fragment() {
     }
 
 
+    private fun createPlayerSlot(name: String, onEdit: (String) -> Unit): View {
+        val playerSlot = layoutInflater.inflate(R.layout.item_player_slot, nameInputsContainer, false)
+
+        playerSlot.layoutParams = GridLayout.LayoutParams().apply {
+            width = 0
+            height = ViewGroup.LayoutParams.WRAP_CONTENT
+            columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+            setMargins(8, 8, 8, 8)
+        }
+
+        val nameText = playerSlot.findViewById<TextView>(R.id.playerNameText)
+        val editBtn = playerSlot.findViewById<ImageButton>(R.id.editBtn)
+
+        nameText.text = name
+        nameText.setOnClickListener {
+            editBtn.visibility = if (editBtn.isVisible) View.GONE else View.VISIBLE
+        }
+
+        editBtn.setOnClickListener {
+            showNameEditDialog(nameText.text.toString()) { newName ->
+                nameText.text = newName
+                onEdit(newName)
+            }
+        }
+
+        return playerSlot
+    }
 
 
 
@@ -247,60 +282,8 @@ class GameFragment : Fragment() {
         nameInputsContainer.removeAllViews()
 
         for (i in 0 until selectedPlayerCount) {
-            val playerSlot = LinearLayout(requireContext()).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = android.view.Gravity.CENTER_VERTICAL
-                layoutParams = GridLayout.LayoutParams().apply {
-                    width = 0
-                    height = ViewGroup.LayoutParams.WRAP_CONTENT
-                    columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                    setMargins(8, 8, 8, 8)
-                }
-            }
-
-            val nameText = TextView(requireContext()).apply {
-                id = View.generateViewId() // or use a static ID if preferred
-                tag = "playerNameText"
-                text = "Spieler ${i + 1}"
-                ellipsize = TextUtils.TruncateAt.END
-                maxLines = 1
-                isSingleLine = true
-                textSize = 14f
-                typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
-                setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            }
-
-            val editBtn = Button(requireContext(), null, 0, R.style.PixelButton).apply {
-                text = "Edit️"
-                typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
-                setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
-                textSize = 12f
-                minWidth = 0
-                minHeight = 0
-                setPadding(0, 0, 0, 0)
-                layoutParams = LinearLayout.LayoutParams(150, 55).apply {
-                    marginStart = 4
-                }
-                visibility = View.GONE
-            }
-
-
-            nameText.setOnClickListener {
-                editBtn.visibility = if (editBtn.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-            }
-
-            editBtn.setOnClickListener {
-                val currentName = nameText.text.toString()
-
-                showNameEditDialog(currentName) { newName ->
-                    nameText.text = newName
-                }
-            }
-
-
-            playerSlot.addView(nameText)
-            playerSlot.addView(editBtn)
+            val name = "Spieler ${i + 1}"
+            val playerSlot = createPlayerSlot(name) {}
             nameInputsContainer.addView(playerSlot)
         }
 
@@ -313,9 +296,7 @@ class GameFragment : Fragment() {
 
     private fun startGame() {
         val playerNames = nameInputsContainer.children
-            .mapNotNull { row ->
-                row.findViewWithTag<TextView>("playerNameText")?.text?.toString()?.trim()
-            }
+            .mapNotNull { it.findViewById<TextView>(R.id.playerNameText)?.text?.toString()?.trim() }
             .filter { it.isNotEmpty() }
             .toList()
 
@@ -471,20 +452,8 @@ class GameFragment : Fragment() {
         selectedPlayerCount = nameInputsContainer.childCount.takeIf { it > 0 } ?: 3
         playerCountSlider.progress = selectedPlayerCount - 3
 
-        // Clamp roles
-        val maxRoles = selectedPlayerCount / 2 + 1
-        val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
-        val impostor = impostorCountText.text.toString().toIntOrNull() ?: 0
-
-        val correctedUndercover = undercover.coerceAtMost(maxRoles)
-        val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
-
-        undercoverCountText.text = correctedUndercover.toString()
-        impostorCountText.text = correctedImpostor.toString()
-
+        updateRoleCountsAndClamping()
         addNameInputs()
-        updateCivilianCount()
-        updateRoleButtonsVisibility()
     }
 
     private fun showSettingsDialog() {
@@ -568,76 +537,12 @@ class GameFragment : Fragment() {
             playerCountLabel.text = "$selectedPlayerCount Spieler"
             nameInputsContainer.removeAllViews()
 
-            playerNames.forEachIndexed { i, name ->
-                val playerSlot = LinearLayout(requireContext()).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    gravity = android.view.Gravity.CENTER_VERTICAL
-                    layoutParams = GridLayout.LayoutParams().apply {
-                        width = 0
-                        height = ViewGroup.LayoutParams.WRAP_CONTENT
-                        columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                        setMargins(8, 8, 8, 8)
-                    }
-                }
-
-                val nameText = TextView(requireContext()).apply {
-                    id = View.generateViewId() // or use a static ID if preferred
-                    tag = "playerNameText"
-                    text = name
-                    ellipsize = TextUtils.TruncateAt.END
-                    maxLines = 1
-                    isSingleLine = true
-                    textSize = 14f
-                    typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
-                    setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
-                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-                }
-
-                val editBtn = Button(requireContext(), null, 0, R.style.PixelButton).apply {
-                    text = "Edit️"
-                    typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
-                    setTextColor(ContextCompat.getColor(context, R.color.pixel_text))
-                    textSize = 12f
-                    minWidth = 0
-                    minHeight = 0
-                    setPadding(0, 0, 0, 0)
-                    layoutParams = LinearLayout.LayoutParams(150, 55).apply {
-                        marginStart = 4
-                    }
-                    visibility = View.GONE
-                }
-
-
-                nameText.setOnClickListener {
-                    editBtn.visibility = if (editBtn.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-                }
-
-                editBtn.setOnClickListener {
-                    val currentName = nameText.text.toString()
-
-                    showNameEditDialog(currentName) { newName ->
-                        nameText.text = newName
-                    }
-                }
-
-
-                playerSlot.addView(nameText)
-                playerSlot.addView(editBtn)
+            playerNames.forEach { name ->
+                val playerSlot = createPlayerSlot(name) {}
                 nameInputsContainer.addView(playerSlot)
             }
 
-            val maxRoles = selectedPlayerCount / 2 + 1
-            val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
-            val impostor = impostorCountText.text.toString().toIntOrNull() ?: 0
-
-            val correctedUndercover = undercover.coerceAtMost(maxRoles)
-            val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
-
-            undercoverCountText.text = correctedUndercover.toString()
-            impostorCountText.text = correctedImpostor.toString()
-
-            updateCivilianCount()
-            updateRoleButtonsVisibility()
+            updateRoleCountsAndClamping()
             btnStartGame.visibility = View.VISIBLE
         }
 
