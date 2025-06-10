@@ -1,11 +1,11 @@
-package ch.spitalstsag.impostata
+package com.freeze.impostata
 
 import android.content.Context
 import android.util.Log
 import androidx.core.content.ContentProviderCompat.requireContext
-import ch.spitalstsag.impostata.model.Player
-import ch.spitalstsag.impostata.model.Role
-import ch.spitalstsag.impostata.model.WordPair
+import com.freeze.impostata.model.Player
+import com.freeze.impostata.model.Role
+import com.freeze.impostata.model.WordPair
 import kotlinx.coroutines.selects.select
 import kotlin.random.Random
 

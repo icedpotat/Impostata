@@ -1,4 +1,4 @@
-package ch.spitalstsag.impostata.model
+package com.freeze.impostata.model
 
 data class Group(
     val name: String,

@@ -1,4 +1,4 @@
-package ch.spitalstsag.impostata
+package com.freeze.impostata
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

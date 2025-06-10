@@ -1,4 +1,4 @@
-package ch.spitalstsag.impostata
+package com.freeze.impostata
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -19,16 +19,16 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
-import ch.spitalstsag.impostata.model.Role
+import com.freeze.impostata.model.Role
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContentProviderCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.content.res.ResourcesCompat
-import ch.spitalstsag.impostata.GameLogic.players
+import com.freeze.impostata.GameLogic.players
 import androidx.core.view.isVisible
-import ch.spitalstsag.impostata.model.Player
+import com.freeze.impostata.model.Player
 
 
 class GameFragment : Fragment() {
@@ -357,12 +357,6 @@ class GameFragment : Fragment() {
         } else {
             startVoting()
         }
-    }
-
-    private fun showWord() {
-        val word = gameLogic.getWordForPlayer(currentPlayerIndex)
-        wordText.text = word ?: "Fehler: Kein Wort gefunden"
-        //wordDisplayLayout.visibility = View.VISIBLE
     }
 
     private fun nextPlayer() {

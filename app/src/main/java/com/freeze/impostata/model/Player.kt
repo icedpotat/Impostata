@@ -1,4 +1,4 @@
-package ch.spitalstsag.impostata.model
+package com.freeze.impostata.model
 
 data class Player(
     val name: String,

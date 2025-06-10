@@ -1,4 +1,4 @@
-package ch.spitalstsag.impostata
+package com.freeze.impostata
 
 
 import android.content.Context
@@ -15,9 +15,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import ch.spitalstsag.impostata.model.Group
+import com.freeze.impostata.model.Group
 import androidx.core.graphics.toColorInt
-import ch.spitalstsag.impostata.model.Player
+import com.freeze.impostata.model.Player
 import com.google.gson.Gson
 import androidx.core.content.edit
 import androidx.core.content.res.ResourcesCompat

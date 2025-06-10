@@ -1,4 +1,4 @@
-package ch.spitalstsag.impostata
+package com.freeze.impostata
 
 import org.junit.Test
 

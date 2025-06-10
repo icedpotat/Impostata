@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "ch.spitalstsag.impostata"
+    namespace = "com.freeze.impostata"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "ch.spitalstsag.impostata"
+        applicationId = "com.freeze.impostata"
         minSdk = 30
         targetSdk = 35
         versionCode = 1
