@@ -7,7 +7,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,8 +17,6 @@ import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import ch.spitalstsag.impostata.model.Role
 import androidx.activity.OnBackPressedCallback
-import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.edit
 import ch.spitalstsag.impostata.GameLogic.players
@@ -88,13 +85,6 @@ class GameFragment : Fragment() {
         GameLogic.chanceNoImpostor = prefs.getInt("chance_no_impostor", 1)
         GameLogic.chanceJester = prefs.getInt("chance_jester", 1)
 
-
-        view.setOnTouchListener { _, _ ->
-            val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-            imm?.hideSoftInputFromWindow(view.windowToken, 0)
-            view.clearFocus()
-            false
-        }
         return view
     }
 
@@ -115,10 +105,8 @@ class GameFragment : Fragment() {
         btnStartGame = view.findViewById(R.id.btnStartGame)
         nameInputsContainer = view.findViewById(R.id.nameInputsContainer)
         currentPlayerText = view.findViewById(R.id.currentPlayerText)
-        //btnShowWord = view.findViewById(R.id.btnShowWord)
-        //wordDisplayLayout = view.findViewById(R.id.wordDisplayLayout)
-        cardFront = view.findViewById<View>(R.id.cardFront)
-        cardBack = view.findViewById<View>(R.id.cardBack)
+        cardFront = view.findViewById(R.id.cardFront)
+        cardBack = view.findViewById(R.id.cardBack)
         wordText = view.findViewById(R.id.wordText)
         btnNextPlayer = view.findViewById(R.id.btnNextPlayer)
         votingButtonsContainer = view.findViewById(R.id.votingButtonsLayout)
@@ -172,8 +160,7 @@ class GameFragment : Fragment() {
     private fun updateRoleCountsAndClamping() {
         val maxRoles = selectedPlayerCount / 2 + 1
 
-        val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
-        val impostor = impostorCountText.text.toString().toIntOrNull() ?: 0
+        val (undercover, impostor, _) = getRoleCounts()
 
         val correctedUndercover = undercover.coerceAtMost(maxRoles)
         val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
@@ -199,7 +186,6 @@ class GameFragment : Fragment() {
         })
 
         btnStartGame.setOnClickListener { startGame() }
-        //btnShowWord.setOnClickListener { showWord() }
         btnNextPlayer.setOnClickListener { nextPlayer() }
         btnConfirmGuess.setOnClickListener { confirmImpostorGuess() }
         btnContinueVoting.setOnClickListener { startVoting() }
@@ -392,7 +378,14 @@ class GameFragment : Fragment() {
         val activePlayers = gameLogic.players.filter { !it.isEjected }
         val starter = activePlayers.random().name
         val direction = if ((0..1).random() == 0) "↪ (Uhrzeigersinn)" else "↩ (Gegen den Uhrzeigersinn)"
-        Toast.makeText(requireContext(), "$starter beginnt. Richtung: $direction", Toast.LENGTH_LONG).show()
+
+        AlertDialog.Builder(requireContext(),R.style.PixelDialog)
+            .setTitle("Spielstart")
+            .setMessage("$starter beginnt.\nRichtung: $direction")
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .setCancelable(false)
+            .show()
+
 
 
         gameLogic.players.forEachIndexed { index, player ->
@@ -528,13 +521,13 @@ class GameFragment : Fragment() {
         cardFront.cameraDistance = 8000 * scale
         cardBack.cameraDistance = 8000 * scale
 
-        val flipOut = ObjectAnimator.ofFloat(cardFront, "rotationX", 0f, 90f)
-        val flipIn = ObjectAnimator.ofFloat(cardBack, "rotationX", -90f, 0f)
+        val flipOut = ObjectAnimator.ofFloat(cardFront, "rotationY", 0f, 90f)
+        val flipIn = ObjectAnimator.ofFloat(cardBack, "rotationY", -90f, 0f)
         flipOut.duration = 300
         flipIn.duration = 300
 
-        val flipBackOut = ObjectAnimator.ofFloat(cardBack, "rotationX", 0f, 90f)
-        val flipBackIn = ObjectAnimator.ofFloat(cardFront, "rotationX", -90f, 0f)
+        val flipBackOut = ObjectAnimator.ofFloat(cardBack, "rotationY", 0f, 90f)
+        val flipBackIn = ObjectAnimator.ofFloat(cardFront, "rotationY", -90f, 0f)
         flipBackOut.duration = 300
         flipBackIn.duration = 300
 

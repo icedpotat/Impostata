@@ -17,11 +17,6 @@
         <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="PixelDialogTheme" parent="Theme.AppCompat.Dialog">
-        <item name="android:background">@drawable/pixel_panel</item>
-        <item name="android:textColor">@color/pixel_text</item>
-        <item name="buttonBarStyle">@style/PixelDialogButtonBar</item>
-    </style>
 
     <style name="PixelDialogButtonBar" parent="Widget.AppCompat.ButtonBar.AlertDialog">
         <item name="android:orientation">horizontal</item>
