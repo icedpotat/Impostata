@@ -5,227 +5,249 @@
     android:layout_height="match_parent"
     android:background="@color/pixel_bg"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:weightSum="1"
+    android:padding="16dp"
+    android:fitsSystemWindows="true">
 
 
     <!-- Setup Phase -->
     <LinearLayout
         android:id="@+id/setupLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/pixel_panel"
+        android:layout_height="match_parent"
         android:orientation="vertical"
+        android:background="@drawable/pixel_panel"
         android:padding="16dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical|end"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:fontFamily="@font/pixel_font"
-                android:gravity="center"
-                android:padding="8dp"
-                android:text="Impostata Spiel"
-                android:textColor="@color/pixel_text"
-                android:textSize="18sp" />
-
-            <Button
-                android:id="@+id/btnSelectGroup"
-                style="@style/PixelButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Gruppen" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/selectedGroupContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="0dp"
-            android:orientation="vertical"
-            android:padding="12dp" />
-
-        <TextView
-            android:id="@+id/playerCountLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="12dp"
-            android:fontFamily="@font/pixel_font"
-            android:text="3 Spieler"
-            android:textColor="@color/pixel_text"
-            android:textSize="14sp" />
-
-        <SeekBar
-            android:id="@+id/playerCountSlider"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="17"
-            android:progress="0"
-            android:progressTint="@color/pixel_text"
-            android:thumbTint="@color/pixel_text" />
-
-        <!-- Role Controls -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="16dp"
-            android:fontFamily="@font/pixel_font"
-            android:text="Rollen"
-            android:textColor="@color/pixel_yellow"
-            android:textSize="16sp" />
-        <!-- Undercover Controls -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnUndercoverMinus"
-                style="@style/PixelButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:text="–" />
-
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="4dp"
-                android:contentDescription="Undercover Icon"
-                android:src="@drawable/ic_undercover" />
-
-            <TextView
-                android:id="@+id/undercoverCountText"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:fontFamily="@font/pixel_font"
-                android:gravity="center"
-                android:includeFontPadding="false"
-                android:lineHeight="16sp"
-                android:text="0"
-                android:textColor="@color/pixel_text"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/btnUndercoverPlus"
-                style="@style/PixelButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="4dp"
-                android:text="+" />
-        </LinearLayout>
-        <!-- Impostor Controls -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnImpostorMinus"
-                style="@style/PixelButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:text="–" />
-
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="4dp"
-                android:contentDescription="Impostor Icon"
-                android:src="@drawable/ic_impostor" />
-
-            <TextView
-                android:id="@+id/ImpostorCountText"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:fontFamily="@font/pixel_font"
-                android:gravity="center"
-                android:includeFontPadding="false"
-                android:lineHeight="16sp"
-                android:text="1"
-                android:textColor="@color/pixel_text"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/btnImpostorPlus"
-                style="@style/PixelButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="4dp"
-                android:text="+" />
-
-
-        </LinearLayout>
-        <!-- Civilians -->
-        <TextView
-            android:id="@+id/civilianCountText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:fontFamily="@font/pixel_font"
-            android:padding="10dp"
-            android:text="Zivile: 0"
-            android:textColor="@color/pixel_text"
-            android:textSize="14sp" />
-
         <ScrollView
-            android:id="@+id/nameInputsScrollView"
+            android:id="@+id/setupScrollView"
             android:layout_width="match_parent"
-            android:layout_height="175dp"
-            android:layout_marginTop="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:fillViewport="true"
             android:scrollbars="vertical">
 
             <LinearLayout
-                android:id="@+id/nameInputsLinearContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical" >
 
-                <GridLayout
-                    android:id="@+id/nameInputsContainer"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:columnCount="2"
-                    android:padding="4dp" />
+                    android:gravity="center_vertical|end"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/pixel_font"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="Impostata Spiel"
+                        android:textColor="@color/pixel_text"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnSelectGroup"
+                        style="@style/PixelButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Gruppen" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/selectedGroupContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"
+                    android:orientation="vertical"
+                    android:padding="12dp" />
+
+                <TextView
+                    android:id="@+id/playerCountLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="12dp"
+                    android:fontFamily="@font/pixel_font"
+                    android:text="3 Spieler"
+                    android:textColor="@color/pixel_text"
+                    android:textSize="14sp" />
+
+                <SeekBar
+                    android:id="@+id/playerCountSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="17"
+                    android:progress="0"
+                    android:progressTint="@color/pixel_text"
+                    android:thumbTint="@color/pixel_text" />
+
+                <!-- Role Controls -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/pixel_font"
+                    android:text="Rollen"
+                    android:textColor="@color/pixel_yellow"
+                    android:textSize="16sp" />
+                <!-- Undercover Controls -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnUndercoverMinus"
+                        style="@style/PixelButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:text="–" />
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="4dp"
+                        android:contentDescription="Undercover Icon"
+                        android:src="@drawable/ic_undercover" />
+
+                    <TextView
+                        android:id="@+id/undercoverCountText"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:fontFamily="@font/pixel_font"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:lineHeight="16sp"
+                        android:text="0"
+                        android:textColor="@color/pixel_text"
+                        android:textSize="16sp" />
+
+                    <Button
+                        android:id="@+id/btnUndercoverPlus"
+                        style="@style/PixelButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="4dp"
+                        android:text="+" />
+                </LinearLayout>
+                <!-- Impostor Controls -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnImpostorMinus"
+                        style="@style/PixelButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:text="–" />
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="4dp"
+                        android:contentDescription="Impostor Icon"
+                        android:src="@drawable/ic_impostor" />
+
+                    <TextView
+                        android:id="@+id/ImpostorCountText"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:fontFamily="@font/pixel_font"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:lineHeight="16sp"
+                        android:text="1"
+                        android:textColor="@color/pixel_text"
+                        android:textSize="16sp" />
+
+                    <Button
+                        android:id="@+id/btnImpostorPlus"
+                        style="@style/PixelButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="4dp"
+                        android:text="+" />
+
+
+                </LinearLayout>
+                <!-- Civilians -->
+                <TextView
+                    android:id="@+id/civilianCountText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/pixel_font"
+                    android:padding="10dp"
+                    android:text="Zivile: 0"
+                    android:textColor="@color/pixel_text"
+                    android:textSize="14sp" />
+
+                <ScrollView
+                    android:id="@+id/nameInputsScrollView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"
+                    android:fillViewport="true"
+                    android:scrollbars="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/nameInputsLinearContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <GridLayout
+                            android:id="@+id/nameInputsContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:columnCount="2"
+                            android:padding="4dp" />
+
+                    </LinearLayout>
+                </ScrollView>
 
             </LinearLayout>
         </ScrollView>
 
-
-        <Button
-            android:id="@+id/btnStartGame"
-            style="@style/PixelButton"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:text="Spiel starten"
-            android:visibility="gone" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
 
-        <ImageButton
-            android:id="@+id/settingsButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_settings"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_gravity="end|bottom"
-            android:contentDescription="Settings"
-            android:padding="8dp"
-            android:layout_marginTop="8dp"/>
+            <Button
+                android:id="@+id/btnStartGame"
+                style="@style/PixelButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Spiel starten" />
+
+            <ImageButton
+                android:id="@+id/settingsButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_settings"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Settings"
+                android:padding="8dp"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
     </LinearLayout>
 
 
