@@ -168,21 +168,35 @@
                     android:layout_height="40dp"
                     android:layout_marginStart="4dp"
                     android:text="+" />
-
-
             </LinearLayout>
             <!-- Civilians -->
-            <TextView
-                android:id="@+id/civilianCountText"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/pixel_font"
-                android:padding="10dp"
-                android:text="Zivile: 0"
-                android:textColor="@color/pixel_text"
-                android:textSize="14sp" />
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="4dp"
+                    android:contentDescription="Crew Icon"
+                    android:src="@drawable/ic_crew" />
+
+                <TextView
+                    android:id="@+id/civilianCountText"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:fontFamily="@font/pixel_font"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:lineHeight="16sp"
+                    android:text="1"
+                    android:textColor="@color/pixel_text"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
             <ScrollView
                 android:id="@+id/nameInputsScrollView"

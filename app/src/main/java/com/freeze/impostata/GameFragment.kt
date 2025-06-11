@@ -242,7 +242,7 @@ class GameFragment : Fragment() {
 
         undercoverCountText.text = undercover.coerceAtMost(maxRoles).toString()
         impostorCountText.text = (maxRoles - undercover.coerceAtMost(maxRoles)).coerceAtMost(impostor).toString()
-        civilianCountText.text = "Crew: $civilian"
+        civilianCountText.text = civilian.toString()
 
         btnUndercoverPlus.visibility = if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
         btnImpostorPlus.visibility = if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
