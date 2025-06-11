@@ -2,11 +2,9 @@ package com.freeze.impostata
 
 import android.content.Context
 import android.util.Log
-import androidx.core.content.ContentProviderCompat.requireContext
 import com.freeze.impostata.model.Player
 import com.freeze.impostata.model.Role
 import com.freeze.impostata.model.WordPair
-import kotlinx.coroutines.selects.select
 import kotlin.random.Random
 
 object GameLogic {
@@ -41,8 +39,6 @@ object GameLogic {
                 .toList()
         }
     }
-
-
 
 
     fun setupGame(playerNames: List<String>, undercoverCount: Int, impostorCountOriginal: Int): Boolean {

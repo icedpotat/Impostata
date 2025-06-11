@@ -7,8 +7,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.ContextThemeWrapper
@@ -23,14 +21,11 @@ import com.freeze.impostata.model.Role
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContentProviderCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.content.res.ResourcesCompat
 import com.freeze.impostata.GameLogic.players
 import androidx.core.view.isVisible
-import com.freeze.impostata.model.Player
-
 
 class GameFragment : Fragment() {
     private enum class GamePhase { SETUP, PLAYING, VOTING, RESULT }
@@ -75,22 +70,24 @@ class GameFragment : Fragment() {
     private var currentPlayerIndex = 0
     private var flippedOnce = 0
 
-    private val IMPORT_WORDS_REQUEST_CODE = 1001
-    private val REQUEST_CODE_SELECT_GROUP = 2001
-
     //TODO: Deprecated members
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        //Define all views and listeners
         val view = inflater.inflate(R.layout.fragment_game, container, false)
         initViews(view)
         setupListeners()
+        initFlipAnimation()
+
+        //Fill the UI with data for starting
         addNameInputs()
         updateCivilianCount()
         updateRoleButtonsVisibility()
-        initFlipAnimation()
 
+        //Get master wordlist
         GameLogic.initWordPairs(requireContext())
 
+        //Setup shared prefs for role chances
         val prefs = requireContext().getSharedPreferences("impostata_prefs", Context.MODE_PRIVATE)
         GameLogic.chanceAllImpostor = prefs.getInt("chance_all_impostor", 1)
         GameLogic.chanceNoImpostor = prefs.getInt("chance_no_impostor", 1)
@@ -99,6 +96,7 @@ class GameFragment : Fragment() {
         return view
     }
 
+    //Define all views
     private fun initViews(view: View) {
         gameLogic = GameLogic
 
@@ -138,52 +136,7 @@ class GameFragment : Fragment() {
         btnSettings = view.findViewById(R.id.settingsButton)
     }
 
-    private fun setGamePhase(phase: GamePhase) {
-        setupLayout.visibility = if (phase == GamePhase.SETUP) View.VISIBLE else View.GONE
-        gameLayout.visibility = if (phase == GamePhase.PLAYING) View.VISIBLE else View.GONE
-        votingLayout.visibility = if (phase == GamePhase.VOTING) View.VISIBLE else View.GONE
-        resultLayout.visibility = if (phase == GamePhase.RESULT) View.VISIBLE else View.GONE
-    }
-
-    private fun getRoleCounts(): Triple<Int, Int, Int> {
-        val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
-        val impostor = impostorCountText.text.toString().toIntOrNull() ?: 0
-        val civilian = (selectedPlayerCount - undercover - impostor).coerceAtLeast(0)
-        return Triple(undercover, impostor, civilian)
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun updateCivilianCount() {
-        val (_, _, civilian) = getRoleCounts()
-        civilianCountText.text = "Crew: $civilian"
-    }
-
-    private fun updateRoleButtonsVisibility() {
-        val (undercover, impostor, _) = getRoleCounts()
-        val maxRoles = selectedPlayerCount / 2 + 1
-
-        btnUndercoverPlus.visibility = if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
-        btnImpostorPlus.visibility = if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
-
-        btnUndercoverMinus.visibility = if ((impostor == 0 && undercover == 1) || undercover == 0) View.INVISIBLE else View.VISIBLE
-        btnImpostorMinus.visibility = if ((undercover == 0 && impostor == 1) || impostor == 0) View.INVISIBLE else View.VISIBLE
-    }
-
-    private fun updateRoleCountsAndClamping() {
-        val maxRoles = selectedPlayerCount / 2 + 1
-
-        val (undercover, impostor, _) = getRoleCounts()
-
-        val correctedUndercover = undercover.coerceAtMost(maxRoles)
-        val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
-
-        undercoverCountText.text = correctedUndercover.toString()
-        impostorCountText.text = correctedImpostor.toString()
-
-        updateCivilianCount()
-        updateRoleButtonsVisibility()
-    }
-
+    //Sets up all the listeners
     private fun setupListeners() {
         playerCountSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             @SuppressLint("SetTextI18n")
@@ -221,6 +174,126 @@ class GameFragment : Fragment() {
 
     }
 
+    //Initialize the flipping of the cards
+    private fun initFlipAnimation() {
+        val scale = requireContext().resources.displayMetrics.density
+        cardFront.cameraDistance = 8000 * scale
+        cardBack.cameraDistance = 8000 * scale
+
+        val flipOut = ObjectAnimator.ofFloat(cardFront, "rotationY", 0f, 90f)
+        val flipIn = ObjectAnimator.ofFloat(cardBack, "rotationY", -90f, 0f)
+        flipOut.duration = 300
+        flipIn.duration = 300
+
+        val flipBackOut = ObjectAnimator.ofFloat(cardBack, "rotationY", 0f, 90f)
+        val flipBackIn = ObjectAnimator.ofFloat(cardFront, "rotationY", -90f, 0f)
+        flipBackOut.duration = 300
+        flipBackIn.duration = 300
+
+
+        cardFront.setOnClickListener {
+            flippedOnce = 1
+            val word = GameLogic.getWordForPlayer(currentPlayerIndex)
+            wordText.text = word ?: "Fehler: Kein Wort"
+
+            flipOut.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    cardFront.visibility = View.GONE
+                    cardBack.visibility = View.VISIBLE
+                    flipIn.start()
+                }
+            })
+
+            flipOut.start()
+        }
+
+        cardBack.setOnClickListener {
+            flipBackOut.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    cardBack.visibility = View.GONE
+                    cardFront.visibility = View.VISIBLE
+                    flipBackIn.start()
+                }
+            })
+
+            flipBackOut.start()
+        }
+
+    }
+
+    //Helper method to quickly change views
+    private fun setGamePhase(phase: GamePhase) {
+        setupLayout.visibility = if (phase == GamePhase.SETUP) View.VISIBLE else View.GONE
+        gameLayout.visibility = if (phase == GamePhase.PLAYING) View.VISIBLE else View.GONE
+        votingLayout.visibility = if (phase == GamePhase.VOTING) View.VISIBLE else View.GONE
+        resultLayout.visibility = if (phase == GamePhase.RESULT) View.VISIBLE else View.GONE
+    }
+
+    //Returns the current triple of role counts
+    private fun getRoleCounts(): Triple<Int, Int, Int> {
+        val undercover = undercoverCountText.text.toString().toIntOrNull() ?: 0
+        val impostor = impostorCountText.text.toString().toIntOrNull() ?: 0
+        val civilian = (selectedPlayerCount - undercover - impostor).coerceAtLeast(0)
+        return Triple(undercover, impostor, civilian)
+    }
+
+    //Updates the crew count text
+    @SuppressLint("SetTextI18n")
+    private fun updateCivilianCount() {
+        val (_, _, civilian) = getRoleCounts()
+        civilianCountText.text = "Crew: $civilian"
+    }
+
+    //Updates the visibility of the buttons
+    private fun updateRoleButtonsVisibility() {
+        val (undercover, impostor, _) = getRoleCounts()
+        val maxRoles = selectedPlayerCount / 2 + 1
+
+        btnUndercoverPlus.visibility = if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
+        btnImpostorPlus.visibility = if (undercover + impostor < maxRoles) View.VISIBLE else View.INVISIBLE
+
+        btnUndercoverMinus.visibility = if ((impostor == 0 && undercover == 1) || undercover == 0) View.INVISIBLE else View.VISIBLE
+        btnImpostorMinus.visibility = if ((undercover == 0 && impostor == 1) || impostor == 0) View.INVISIBLE else View.VISIBLE
+    }
+
+    //Updates the max possible roles and hence runs the other functions too
+    private fun updateRoleCountsAndClamping() {
+        val maxRoles = selectedPlayerCount / 2 + 1
+
+        val (undercover, impostor, _) = getRoleCounts()
+
+        val correctedUndercover = undercover.coerceAtMost(maxRoles)
+        val correctedImpostor = (maxRoles - correctedUndercover).coerceAtMost(impostor)
+
+        undercoverCountText.text = correctedUndercover.toString()
+        impostorCountText.text = correctedImpostor.toString()
+
+        updateCivilianCount()
+        updateRoleButtonsVisibility()
+    }
+
+    //Function for handling the + and - buttons for the roles
+    private fun changeRoleCount(textView: TextView, delta: Int) {
+        val current = textView.text.toString().toIntOrNull() ?: 0
+        val newCount = (current + delta).coerceAtLeast(0)
+
+        if (textView == undercoverCountText) undercoverCountText.text = newCount.toString()
+        if (textView == impostorCountText) impostorCountText.text = newCount.toString()
+
+        val (undercover, impostor, _) = getRoleCounts()
+        val maxAllowed = selectedPlayerCount / 2 + 1
+
+        if (undercover + impostor > maxAllowed) {
+            Toast.makeText(requireContext(), "Maximal $maxAllowed Sonderrollen erlaubt.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        textView.text = newCount.toString()
+        updateCivilianCount()
+        updateRoleButtonsVisibility()
+    }
+
+    //Dialog for editing the names in the setup layout from the Playerslots
     private fun showNameEditDialog(initialName: String, onNameConfirmed: (String) -> Unit) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_name, null)
         val input = dialogView.findViewById<EditText>(R.id.editNameInput).apply {
@@ -255,7 +328,8 @@ class GameFragment : Fragment() {
         dialog.show()
     }
 
-
+    //Creates reusable Playerslots for listing the players in the setupscreen
+    //Returns the playerslot as a view
     private fun createPlayerSlot(name: String, onEdit: (String) -> Unit): View {
         val playerSlot = layoutInflater.inflate(R.layout.item_player_slot, nameInputsContainer, false)
 
@@ -284,8 +358,8 @@ class GameFragment : Fragment() {
         return playerSlot
     }
 
-
-
+    //Function to add customizable players to the playerslist when no group is selected
+    //Uses the playerslots from earlier
     private fun addNameInputs() {
         nameInputsContainer.removeAllViews()
 
@@ -298,10 +372,7 @@ class GameFragment : Fragment() {
         btnStartGame.visibility = View.VISIBLE
     }
 
-
-
-
-
+    //Reads the playernames from the view and prepares the game
     private fun startGame() {
         val playerNames = nameInputsContainer.children
             .mapNotNull { it.findViewById<TextView>(R.id.playerNameText)?.text?.toString()?.trim() }
@@ -310,9 +381,7 @@ class GameFragment : Fragment() {
 
         Log.d("PlayerNames",playerNames.toString())
 
-
-        val undercoverCount = undercoverCountText.text.toString().toIntOrNull() ?: 0
-        val impostorCount = impostorCountText.text.toString().toIntOrNull() ?: 0
+        val (undercoverCount, impostorCount, _) = getRoleCounts()
 
         if (!gameLogic.setupGame(playerNames, undercoverCount, impostorCount)) {
             Toast.makeText(requireContext(), "Zu viele Undercover/Impostor für diese Spieleranzahl.", Toast.LENGTH_SHORT).show()
@@ -328,26 +397,8 @@ class GameFragment : Fragment() {
 
     }
 
-    private fun changeRoleCount(textView: TextView, delta: Int) {
-        val current = textView.text.toString().toIntOrNull() ?: 0
-        val newCount = (current + delta).coerceAtLeast(0)
 
-        if (textView == undercoverCountText) undercoverCountText.text = newCount.toString()
-        if (textView == impostorCountText) impostorCountText.text = newCount.toString()
-
-        val (undercover, impostor, _) = getRoleCounts()
-        val maxAllowed = selectedPlayerCount / 2 + 1
-
-        if (undercover + impostor > maxAllowed) {
-            Toast.makeText(requireContext(), "Maximal $maxAllowed Sonderrollen erlaubt.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        textView.text = newCount.toString()
-        updateCivilianCount()
-        updateRoleButtonsVisibility()
-    }
-
+    //Handles the passing on of the phone, nextplayer button is then clickable
     @SuppressLint("SetTextI18n")
     private fun updateCurrentPlayer() {
         if (currentPlayerIndex < gameLogic.players.size) {
@@ -358,6 +409,7 @@ class GameFragment : Fragment() {
         }
     }
 
+    //Handles the passing on of the phone further
     private fun nextPlayer() {
         if (flippedOnce == 1) {
             flippedOnce = 0
@@ -373,6 +425,8 @@ class GameFragment : Fragment() {
             Toast.makeText(requireContext(),"Schaue dir zuerst das Wort an ;)", Toast.LENGTH_LONG).show()
         }
     }
+
+    //Shows the starting and rotation info
     @SuppressLint("SetTextI18n")
     private fun showGameStartDialog() {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_game_start, null)
@@ -391,24 +445,6 @@ class GameFragment : Fragment() {
             .show()
 
         dialogView.findViewById<Button>(R.id.okButton)?.setOnClickListener {
-            dialog.dismiss()
-        }
-    }
-
-    private fun showConfirmExitDialog() {
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_confirm_exit, null)
-
-        val dialog = AlertDialog.Builder(requireContext(), R.style.PixelDialog)
-            .setView(dialogView)
-            .setCancelable(false)
-            .show()
-
-        dialogView.findViewById<Button>(R.id.btnConfirm)?.setOnClickListener {
-            restartGame()
-            dialog.dismiss()
-        }
-
-        dialogView.findViewById<Button>(R.id.btnCancel)?.setOnClickListener {
             dialog.dismiss()
         }
     }
@@ -488,7 +524,7 @@ class GameFragment : Fragment() {
             "Impostor hat richtig geraten! Impostor gewinnen."
 
         } else {
-            "Falsches Wort, u suck lol"
+            "Falsches Wort :("
         }
 
         impostorGuessInput.text?.clear()
@@ -563,54 +599,23 @@ class GameFragment : Fragment() {
         dialog.show()
     }
 
+    private fun showConfirmExitDialog() {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_confirm_exit, null)
 
-    private fun initFlipAnimation() {
-        val scale = requireContext().resources.displayMetrics.density
-        cardFront.cameraDistance = 8000 * scale
-        cardBack.cameraDistance = 8000 * scale
+        val dialog = AlertDialog.Builder(requireContext(), R.style.PixelDialog)
+            .setView(dialogView)
+            .setCancelable(false)
+            .show()
 
-        val flipOut = ObjectAnimator.ofFloat(cardFront, "rotationY", 0f, 90f)
-        val flipIn = ObjectAnimator.ofFloat(cardBack, "rotationY", -90f, 0f)
-        flipOut.duration = 300
-        flipIn.duration = 300
-
-        val flipBackOut = ObjectAnimator.ofFloat(cardBack, "rotationY", 0f, 90f)
-        val flipBackIn = ObjectAnimator.ofFloat(cardFront, "rotationY", -90f, 0f)
-        flipBackOut.duration = 300
-        flipBackIn.duration = 300
-
-
-        cardFront.setOnClickListener {
-            flippedOnce = 1
-            val word = GameLogic.getWordForPlayer(currentPlayerIndex)
-            wordText.text = word ?: "Fehler: Kein Wort"
-
-            flipOut.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    cardFront.visibility = View.GONE
-                    cardBack.visibility = View.VISIBLE
-                    flipIn.start()
-                }
-            })
-
-            flipOut.start()
+        dialogView.findViewById<Button>(R.id.btnConfirm)?.setOnClickListener {
+            restartGame()
+            dialog.dismiss()
         }
 
-        cardBack.setOnClickListener {
-            flipBackOut.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    cardBack.visibility = View.GONE
-                    cardFront.visibility = View.VISIBLE
-                    flipBackIn.start()
-                }
-            })
-
-            flipBackOut.start()
+        dialogView.findViewById<Button>(R.id.btnCancel)?.setOnClickListener {
+            dialog.dismiss()
         }
-
     }
-
-
 
     // Activity result launchers
     private val importWordsLauncher = registerForActivityResult(
