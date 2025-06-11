@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/votingLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/pixel_panel"
+    android:orientation="vertical"
+    android:padding="16dp" >
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/pixel_font"
+        android:text="Stimmt ab, wer der Impostor ist!"
+        android:textColor="@color/pixel_text"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:id="@+id/remainingRolesLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:gravity="center">
+
+        <LinearLayout
+            android:id="@+id/impostorInfo"
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_impostor"
+                android:contentDescription="Impostor" />
+
+            <TextView
+                android:id="@+id/votingImpostorCountText"
+                android:text="0"
+                android:textColor="@color/pixel_text"
+                android:fontFamily="@font/pixel_font"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/undercoverInfo"
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_undercover"
+                android:contentDescription="Undercover" />
+
+            <TextView
+                android:id="@+id/votingUndercoverCountText"
+                android:text="0"
+                android:textColor="@color/pixel_text"
+                android:fontFamily="@font/pixel_font"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/crewInfo"
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_crew"
+                android:contentDescription="Undercover" />
+
+            <TextView
+                android:id="@+id/votingCrewCountText"
+                android:text="0"
+                android:textColor="@color/pixel_text"
+                android:fontFamily="@font/pixel_font"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:fillViewport="true"
+        android:scrollbars="vertical">
+        <LinearLayout
+            android:id="@+id/votingButtonsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical" />
+    </ScrollView>
+</LinearLayout>

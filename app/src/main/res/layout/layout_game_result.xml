@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/resultLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/pixel_panel"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:visibility="gone">
+
+    <TextView
+        android:id="@+id/voteResultText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/pixel_font"
+        android:paddingBottom="8dp"
+        android:textColor="@color/pixel_text"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:id="@+id/ImpostorGuessLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pixel_font"
+            android:text="Impostor, rate das Crew-Wort:"
+            android:textColor="@color/pixel_text" />
+
+        <EditText
+            android:id="@+id/ImpostorGuessInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/pixel_text"
+            android:hint="Crew-Wort"
+            android:textColor="@color/pixel_text"
+            android:textColorHint="#AAAAAA" />
+
+        <Button
+            android:id="@+id/btnConfirmGuess"
+            style="@style/PixelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Bestätigen" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnContinueVoting"
+        style="@style/PixelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Weiter zur nächsten Abstimmung"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btnRestartGame"
+        style="@style/PixelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Neues Spiel starten"
+        android:visibility="gone" />
+</LinearLayout>

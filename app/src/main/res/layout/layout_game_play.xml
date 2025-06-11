@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/gameLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/pixel_panel"
+    android:gravity="center"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/currentPlayerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/pixel_font"
+        android:textSize="18sp"
+        android:textColor="@color/pixel_text"
+        android:paddingBottom="16dp" />
+
+    <!-- Centered Card View -->
+    <FrameLayout
+        android:id="@+id/roleCardContainer"
+        android:layout_width="220dp"
+        android:layout_height="140dp"
+        android:layout_marginBottom="24dp">
+
+        <!-- Front of card -->
+        <LinearLayout
+            android:id="@+id/cardFront"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/pixel_card_back"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:elevation="4dp">
+
+            <TextView
+                android:id="@+id/cardTapText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tippe, um deine Rolle zu sehen"
+                android:textColor="@color/pixel_text"
+                android:fontFamily="@font/pixel_font"
+                android:textSize="14sp"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <!-- Back of card -->
+        <LinearLayout
+            android:id="@+id/cardBack"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/pixel_card_front"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:elevation="4dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/wordText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/pixel_text"
+                android:fontFamily="@font/pixel_font"
+                android:textSize="16sp"
+                android:gravity="center" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/btnNextPlayer"
+        style="@style/PixelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Weitergeben" />
+</LinearLayout>

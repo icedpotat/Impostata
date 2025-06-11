@@ -45,7 +45,7 @@ object GameLogic {
         isCrewGame = false
         isImpostorGame = false
         var impostorCount = impostorCountOriginal
-        if (undercoverCount + impostorCount + 1 >= playerNames.size) return false
+        if (undercoverCount + impostorCount >= playerNames.size) return false
 
         players = playerNames.mapIndexed { index, name ->
             val trimmedName = name.trim()
@@ -90,6 +90,9 @@ object GameLogic {
         if (Random.nextInt(100) < chanceJester) {
             assignRole(Role.JESTER, 1)
         }
+
+        players.forEach { it.originalRole = it.role }
+
 
         remainingImpostors = impostorCount
         startImpostors = impostorCount
@@ -148,8 +151,32 @@ object GameLogic {
         return correct
     }
 
+    fun getRemainingRoleCount(role: Role): Int {
+        return players.count { !it.isEjected && it.role == role }
+    }
 
     fun isGameOver(): Boolean = !isCrewGame && remainingImpostors == 0 || gameEnded
+
+    fun getGameSummary(): String {
+        val grouped = players.groupBy { it.originalRole }
+        val builder = StringBuilder("Spielzusammenfassung:\n\n")
+
+        val word = selectedPair?.crewWord
+
+        builder. append("Das Wort war: $word\n\n")
+
+        Role.entries.forEach { role ->
+            val playersInRole = grouped[role] ?: return@forEach
+            builder.append("🔹 ${role.name}:\n")
+            playersInRole.forEach {
+                builder.append("• ${it.name}\n")
+            }
+            builder.append("\n")
+        }
+
+        return builder.toString().trim()
+    }
+
 
     fun resetGame() {
         players.clear()
