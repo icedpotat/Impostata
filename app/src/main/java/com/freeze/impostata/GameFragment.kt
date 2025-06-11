@@ -21,6 +21,7 @@ import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.freeze.impostata.model.Role
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContentProviderCompat
 import androidx.core.content.ContextCompat
@@ -211,7 +212,7 @@ class GameFragment : Fragment() {
         groupContainer.setOnClickListener { removeGroupView() }
         btnSelectGroup.setOnClickListener {
             val intent = Intent(requireContext(), GroupActivity::class.java)
-            startActivityForResult(intent, REQUEST_CODE_SELECT_GROUP)
+            selectGroupLauncher.launch(intent)
         }
 
         btnSettings.setOnClickListener {
@@ -557,8 +558,8 @@ class GameFragment : Fragment() {
                 type = "text/*"
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
-            startActivityForResult(intent, IMPORT_WORDS_REQUEST_CODE)        }
-
+            importWordsLauncher.launch(intent)
+        }
         dialog.show()
     }
 
@@ -611,13 +612,12 @@ class GameFragment : Fragment() {
 
 
 
-    @Deprecated("Deprecated in Java")
-    @SuppressLint("SetTextI18n")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == IMPORT_WORDS_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            data?.data?.let { uri ->
+    // Activity result launchers
+    private val importWordsLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { uri ->
                 requireContext().contentResolver.openInputStream(uri)?.bufferedReader()?.forEachLine { line ->
                     val parts = line.split(",")
                     if (parts.size == 2) {
@@ -626,9 +626,16 @@ class GameFragment : Fragment() {
                 }
                 Toast.makeText(requireContext(), "Wörter erfolgreich importiert.", Toast.LENGTH_SHORT).show()
             }
-        }else if (requestCode == REQUEST_CODE_SELECT_GROUP && resultCode == Activity.RESULT_OK) {
-            val groupName = data?.getStringExtra("selectedGroupName")
-            val playerNames = data?.getStringArrayListExtra("selectedGroupPlayers") ?: arrayListOf()
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private val selectGroupLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val groupName = result.data?.getStringExtra("selectedGroupName")
+            val playerNames = result.data?.getStringArrayListExtra("selectedGroupPlayers") ?: arrayListOf()
 
             Log.d("TEST", "Group Name: $groupName, Player Names: $playerNames")
 
@@ -655,7 +662,6 @@ class GameFragment : Fragment() {
             updateRoleCountsAndClamping()
             btnStartGame.visibility = View.VISIBLE
         }
-
     }
     override fun onResume() {
         super.onResume()
@@ -666,10 +672,9 @@ class GameFragment : Fragment() {
                     showConfirmExitDialog()
                 } else {
                     isEnabled = false
-                    requireActivity().onBackPressed()
+                    requireActivity().onBackPressedDispatcher.onBackPressed()
                 }
             }
         })
     }
-
 }
