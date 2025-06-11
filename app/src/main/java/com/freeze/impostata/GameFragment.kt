@@ -228,7 +228,6 @@ class GameFragment : Fragment() {
             requestFocus()
         }
 
-
         val dialog = AlertDialog.Builder(requireContext(), R.style.PixelDialog)
             .setView(dialogView)
             .create()
@@ -353,7 +352,6 @@ class GameFragment : Fragment() {
         if (currentPlayerIndex < gameLogic.players.size) {
             val player = gameLogic.players[currentPlayerIndex]
             currentPlayerText.text = "Gerät an: \n${player.name}"
-            //wordDisplayLayout.visibility = View.GONE
         } else {
             startVoting()
         }
@@ -392,6 +390,24 @@ class GameFragment : Fragment() {
             .show()
 
         dialogView.findViewById<Button>(R.id.okButton)?.setOnClickListener {
+            dialog.dismiss()
+        }
+    }
+
+    private fun showConfirmExitDialog() {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_confirm_exit, null)
+
+        val dialog = AlertDialog.Builder(requireContext(), R.style.PixelDialog)
+            .setView(dialogView)
+            .setCancelable(false)
+            .show()
+
+        dialogView.findViewById<Button>(R.id.btnConfirm)?.setOnClickListener {
+            restartGame()
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.btnCancel)?.setOnClickListener {
             dialog.dismiss()
         }
     }
@@ -647,7 +663,7 @@ class GameFragment : Fragment() {
             override fun handleOnBackPressed() {
                 // If not in setup phase, reset game
                 if (setupLayout.visibility != View.VISIBLE) {
-                    restartGame()
+                    showConfirmExitDialog()
                 } else {
                     isEnabled = false
                     requireActivity().onBackPressed()
