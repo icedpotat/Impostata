@@ -5,8 +5,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/pixel_panel"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:visibility="gone">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/voteResultText"

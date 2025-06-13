@@ -63,6 +63,8 @@ class GameFragment : Fragment() {
     private lateinit var btnSelectGroup: Button
     private lateinit var undercoverCountText: TextView
     private lateinit var impostorCountText: TextView
+    private lateinit var btnRemainingInfo: ImageButton
+    private lateinit var remainingRoleLayout: LinearLayout
 
     private lateinit var btnSettings: ImageButton
 
@@ -132,6 +134,9 @@ class GameFragment : Fragment() {
         groupContainer = view.findViewById(R.id.selectedGroupContainer)
         btnSelectGroup = view.findViewById(R.id.btnSelectGroup)
 
+        btnRemainingInfo = view.findViewById(R.id.remainingRolesInfo)
+        remainingRoleLayout = view.findViewById(R.id.remainingRolesLayout)
+
         btnSettings = view.findViewById(R.id.settingsButton)
     }
 
@@ -171,6 +176,10 @@ class GameFragment : Fragment() {
             showSettingsDialog()
         }
 
+        btnRemainingInfo.setOnClickListener {
+            remainingRoleLayout.visibility = if (remainingRoleLayout.isVisible) View.GONE else View.VISIBLE
+
+        }
     }
 
     //Initialize the flipping of the cards
