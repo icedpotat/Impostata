@@ -18,55 +18,46 @@
         android:paddingBottom="16dp" />
 
     <!-- Centered Card View -->
+
     <FrameLayout
         android:id="@+id/roleCardContainer"
         android:layout_width="220dp"
         android:layout_height="140dp"
+        android:layout_gravity="center"
         android:layout_marginBottom="24dp">
 
-        <!-- Front of card -->
+        <!-- Word displayed below -->
+        <TextView
+            android:id="@+id/wordText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textColor="@color/pixel_text"
+            android:fontFamily="@font/pixel_font"
+            android:textSize="18sp"
+            android:background="@drawable/pixel_card_front" />
+
+        <!-- Cover card that slides -->
         <LinearLayout
-            android:id="@+id/cardFront"
+            android:id="@+id/cardCover"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/pixel_card_back"
             android:gravity="center"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:elevation="4dp">
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/cardTapText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tippe, um deine Rolle zu sehen"
+                android:text="Halte gedrückt, um das Wort zu sehen"
                 android:textColor="@color/pixel_text"
                 android:fontFamily="@font/pixel_font"
                 android:textSize="14sp"
                 android:gravity="center" />
+
         </LinearLayout>
 
-        <!-- Back of card -->
-        <LinearLayout
-            android:id="@+id/cardBack"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/pixel_card_front"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:elevation="4dp"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/wordText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/pixel_text"
-                android:fontFamily="@font/pixel_font"
-                android:textSize="16sp"
-                android:gravity="center" />
-        </LinearLayout>
     </FrameLayout>
 
     <Button

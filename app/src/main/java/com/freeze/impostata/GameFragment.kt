@@ -36,8 +36,7 @@ class GameFragment : Fragment() {
     private lateinit var gameLayout: ViewGroup
     private lateinit var votingLayout: ViewGroup
     private lateinit var resultLayout: ViewGroup
-    private lateinit var cardFront: View
-    private lateinit var cardBack: View
+    private lateinit var cardCover: LinearLayout
 
     private lateinit var nameInputsContainer: GridLayout
     private lateinit var currentPlayerText: TextView
@@ -70,7 +69,7 @@ class GameFragment : Fragment() {
 
     private var selectedPlayerCount = 3
     private var currentPlayerIndex = 0
-    private var flippedOnce = 0
+    var flippedOnce = 0
 
     //TODO: Deprecated members
 
@@ -115,8 +114,8 @@ class GameFragment : Fragment() {
         btnStartGame = view.findViewById(R.id.btnStartGame)
         nameInputsContainer = view.findViewById(R.id.nameInputsContainer)
         currentPlayerText = view.findViewById(R.id.currentPlayerText)
-        cardFront = view.findViewById(R.id.cardFront)
-        cardBack = view.findViewById(R.id.cardBack)
+        cardCover = view.findViewById(R.id.cardCover)
+
         wordText = view.findViewById(R.id.wordText)
         btnNextPlayer = view.findViewById(R.id.btnNextPlayer)
         votingButtonsContainer = view.findViewById(R.id.votingButtonsLayout)
@@ -184,49 +183,9 @@ class GameFragment : Fragment() {
 
     //Initialize the flipping of the cards
     private fun initFlipAnimation() {
-        val scale = requireContext().resources.displayMetrics.density
-        cardFront.cameraDistance = 8000 * scale
-        cardBack.cameraDistance = 8000 * scale
-
-        val flipOut = ObjectAnimator.ofFloat(cardFront, "rotationY", 0f, 90f)
-        val flipIn = ObjectAnimator.ofFloat(cardBack, "rotationY", -90f, 0f)
-        flipOut.duration = 300
-        flipIn.duration = 300
-
-        val flipBackOut = ObjectAnimator.ofFloat(cardBack, "rotationY", 0f, 90f)
-        val flipBackIn = ObjectAnimator.ofFloat(cardFront, "rotationY", -90f, 0f)
-        flipBackOut.duration = 300
-        flipBackIn.duration = 300
-
-
-        cardFront.setOnClickListener {
+        RoleRevealAnimator.setSliderReveal(cardCover) {
             flippedOnce = 1
-            val word = GameLogic.getWordForPlayer(currentPlayerIndex)
-            wordText.text = word ?: "Fehler: Kein Wort"
-
-            flipOut.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    cardFront.visibility = View.GONE
-                    cardBack.visibility = View.VISIBLE
-                    flipIn.start()
-                }
-            })
-
-            flipOut.start()
         }
-
-        cardBack.setOnClickListener {
-            flipBackOut.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    cardBack.visibility = View.GONE
-                    cardFront.visibility = View.VISIBLE
-                    flipBackIn.start()
-                }
-            })
-
-            flipBackOut.start()
-        }
-
     }
 
     //Helper method to quickly change views
@@ -376,6 +335,9 @@ class GameFragment : Fragment() {
         if (currentPlayerIndex < gameLogic.players.size) {
             val player = gameLogic.players[currentPlayerIndex]
             currentPlayerText.text = "Gerät an: \n${player.name}"
+            Log.d("playeridx",currentPlayerIndex.toString())
+            val word = GameLogic.getWordForPlayer(currentPlayerIndex)
+            wordText.text = word ?: "Fehler: Kein Wort"
         } else {
             startVoting()
         }
@@ -386,16 +348,11 @@ class GameFragment : Fragment() {
         if (flippedOnce == 1) {
             flippedOnce = 0
             currentPlayerIndex++
-
-            cardBack.visibility = View.GONE
-            cardFront.visibility = View.VISIBLE
-            cardFront.rotationY = 0f
-            cardBack.rotationY = 0f
-
             updateCurrentPlayer()
         } else {
             Toast.makeText(requireContext(),"Schaue dir zuerst das Wort an ;)", Toast.LENGTH_LONG).show()
         }
+
     }
 
     //Shows the starting and rotation info
