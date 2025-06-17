@@ -103,15 +103,16 @@ object GameLogic {
     }
 
     private fun assignRole(role: Role, count: Int) {
-        var assigned = 0
-        while (assigned < count) {
-            val idx = Random.nextInt(players.size)
-            if (players[idx].role == Role.CREW) {
-                players[idx].role = role
-                assigned++
-            }
+        val crewIndices = List(players.size) { i -> i }
+            .filter { players[it].role == Role.CREW }
+            .shuffled()
+            .take(count)
+
+        crewIndices.forEach { idx ->
+            players[idx].role = role
         }
     }
+
 
     private fun getRoleForPlayer(index: Int): Role? = players.getOrNull(index)?.role
 
@@ -119,7 +120,7 @@ object GameLogic {
         val jesterWord = selectedPair?.crewWord
         return when (getRoleForPlayer(index)) {
             Role.CREW -> selectedPair?.crewWord
-            Role.JESTER -> "Du bist Jester. Das Wort ist: $jesterWord"
+            Role.JESTER -> "Du bist Jester. Das Wort ist: \n$jesterWord"
             Role.UNDERCOVER -> selectedPair?.undercoverWord
             Role.IMPOSTOR -> "Du bist der Impostor."
             else -> null
@@ -133,7 +134,6 @@ object GameLogic {
             if (!it.isEjected) {
                 if (it.role == Role.JESTER && ejectedPlayers == 0) {
                     gameEnded = true
-                    // optionally: show jester win message
                 }
                 if (it.role == Role.IMPOSTOR) remainingImpostors--
                 it.role = Role.EJECTED
