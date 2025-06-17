@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Impostata</string>
+    <string-array name="reveal_modes">
+        <item>Tippen zum Aufdecken</item>
+        <item>Halten zum Anzeigen</item>
+        <item>Automatisch zeigen</item>
+    </string-array>
+
 </resources>

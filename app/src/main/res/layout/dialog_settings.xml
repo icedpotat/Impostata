@@ -63,6 +63,14 @@
         android:textColorHint="#888888"
         android:fontFamily="@font/pixel_font"/>
 
+    <!-- dialog_settings.xml -->
+    <Spinner
+        android:id="@+id/spinnerRevealMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/reveal_modes" />
+
+
     <Button
         android:id="@+id/btnImportWords"
         android:layout_width="match_parent"

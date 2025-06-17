@@ -17,8 +17,32 @@
         android:textColor="@color/pixel_text"
         android:paddingBottom="16dp" />
 
-    <!-- Centered Card View -->
 
+    <!-- Reveal Modes -->
+    <FrameLayout
+        android:id="@+id/revealModeContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include
+            android:id="@+id/revealClickFlip"
+            layout="@layout/reveal_click_flip"
+            android:visibility="gone" />
+
+        <include
+            android:id="@+id/revealHold"
+            layout="@layout/reveal_hold"
+            android:visibility="gone" />
+
+        <include
+            android:id="@+id/revealGrid"
+            layout="@layout/reveal_grid_picker"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+
+    <!-- Centered Card View -->
     <FrameLayout
         android:id="@+id/roleCardContainer"
         android:layout_width="280dp"

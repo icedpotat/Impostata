@@ -1,8 +1,5 @@
 package com.freeze.impostata
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
@@ -29,6 +26,13 @@ import androidx.core.view.isVisible
 
 class GameFragment : Fragment() {
     private enum class GamePhase { SETUP, PLAYING, VOTING, RESULT }
+
+    enum class RevealMode {
+        CLICK_TO_FLIP,
+        HOLD_TO_REVEAL,
+        GRID_SELECTION
+    }
+
 
     private lateinit var gameLogic: GameLogic
 
@@ -66,10 +70,12 @@ class GameFragment : Fragment() {
     private lateinit var remainingRoleLayout: LinearLayout
 
     private lateinit var btnSettings: ImageButton
+    private lateinit var spinner: Spinner
 
     private var selectedPlayerCount = 3
     private var currentPlayerIndex = 0
-    var flippedOnce = 0
+    private var flippedOnce = 0
+    private lateinit var revealMode: RevealMode
 
     //TODO: Deprecated members
 
@@ -92,6 +98,10 @@ class GameFragment : Fragment() {
         GameLogic.chanceAllImpostor = prefs.getInt("chance_all_impostor", 1)
         GameLogic.chanceNoImpostor = prefs.getInt("chance_no_impostor", 1)
         GameLogic.chanceJester = prefs.getInt("chance_jester", 1)
+
+        val modeOrdinal = prefs.getInt("reveal_mode", 0)
+        revealMode = RevealMode.entries.toTypedArray()[modeOrdinal]
+
 
         return view
     }
@@ -137,6 +147,7 @@ class GameFragment : Fragment() {
         remainingRoleLayout = view.findViewById(R.id.remainingRolesLayout)
 
         btnSettings = view.findViewById(R.id.settingsButton)
+        spinner = view.findViewById(R.id.spinnerRevealMode)
     }
 
     //Sets up all the listeners
@@ -322,37 +333,145 @@ class GameFragment : Fragment() {
 
         setGamePhase(GamePhase.PLAYING)
 
+        val clickFlip = view?.findViewById<View>(R.id.revealClickFlip)
+        val hold = view?.findViewById<View>(R.id.revealHold)
+        val grid = view?.findViewById<View>(R.id.revealGrid)
+
+        clickFlip?.visibility = View.GONE
+        hold?.visibility = View.GONE
+        grid?.visibility = View.GONE
+
+        when (revealMode) {
+            RevealMode.CLICK_TO_FLIP -> {
+                clickFlip?.visibility = View.VISIBLE
+                setupFlipListeners(clickFlip!!)
+            }
+            RevealMode.HOLD_TO_REVEAL -> {
+                hold?.visibility = View.VISIBLE
+                setupHoldListeners(hold!!)
+            }
+            RevealMode.GRID_SELECTION -> {
+                grid?.visibility = View.VISIBLE
+                setupCardGrid(grid!!.findViewById(R.id.cardGrid))
+            }
+        }
+
+
+
         currentPlayerIndex = 0
         updateCurrentPlayer()
         updateRoleSection()
 
     }
 
+    private fun setupFlipListeners(view: View) {
+        val cardFront = view.findViewById<View>(R.id.cardFront)
+        val cardBack = view.findViewById<View>(R.id.cardBack)
+        cardFront.setOnClickListener {
+            cardFront.visibility = View.GONE
+            cardBack.visibility = View.VISIBLE
+            flippedOnce = 1
+        }
+    }
+
+    private fun setupHoldListeners(view: View) {
+        val cardFront = view.findViewById<View>(R.id.cardFront)
+        val cardBack = view.findViewById<View>(R.id.cardBack)
+
+        cardFront.setOnTouchListener { _, event ->
+            when (event.action) {
+                android.view.MotionEvent.ACTION_DOWN -> {
+                    cardFront.visibility = View.GONE
+                    cardBack.visibility = View.VISIBLE
+                    flippedOnce = 1
+                    true
+                }
+                android.view.MotionEvent.ACTION_UP,
+                android.view.MotionEvent.ACTION_CANCEL -> {
+                    cardBack.visibility = View.GONE
+                    cardFront.visibility = View.VISIBLE
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+
+    private fun setupCardGrid(grid: GridLayout) {
+        val totalCards = GameLogic.players.size
+        for (i in 0 until totalCards) {
+            val card = LayoutInflater.from(context).inflate(R.layout.card_preview_small, grid, false)
+            card.setOnClickListener {
+                showCardRevealDialog(i)
+            }
+            grid.addView(card)
+        }
+    }
+
+    private val revealedCardIndices = mutableSetOf<Int>()
+
+    private fun showCardRevealDialog(playerIndex: Int) {
+        if (playerIndex in revealedCardIndices) return
+
+        val dialogView = layoutInflater.inflate(R.layout.dialog_card_reveal, null)
+        val nameText = dialogView.findViewById<TextView>(R.id.DrevealName)
+        val roleText = dialogView.findViewById<TextView>(R.id.DrevealRole)
+
+        val player = GameLogic.players[playerIndex]
+        nameText.text = player.name
+
+        roleText.text = when (player.role) {
+            Role.CREW, Role.UNDERCOVER, Role.JESTER -> GameLogic.getWordForPlayer(playerIndex)
+            Role.IMPOSTOR -> "Du bist der Impostor. Versuche das Crew-Wort zu erraten!"
+            else -> "Unbekannte Rolle"
+        }
+
+        AlertDialog.Builder(requireContext(), R.style.PixelDialog)
+            .setView(dialogView)
+            .setCancelable(false)
+            .setPositiveButton("OK") { dialog, _ ->
+                revealedCardIndices.add(playerIndex)
+                flippedOnce = 1
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+
+
 
     //Handles the passing on of the phone, nextplayer button is then clickable
     @SuppressLint("SetTextI18n")
     private fun updateCurrentPlayer() {
-        if (currentPlayerIndex < gameLogic.players.size) {
-            val player = gameLogic.players[currentPlayerIndex]
-            currentPlayerText.text = "Gerät an: \n${player.name}"
-            Log.d("playeridx",currentPlayerIndex.toString())
-            val word = GameLogic.getWordForPlayer(currentPlayerIndex)
-            wordText.text = word ?: "Fehler: Kein Wort"
-        } else {
+        if (currentPlayerIndex >= GameLogic.players.size) {
             startVoting()
+            return
+        }
+
+        val player = GameLogic.players[currentPlayerIndex]
+        currentPlayerText.text = "Gerät an: \n${player.name}"
+
+        when (revealMode) {
+            RevealMode.CLICK_TO_FLIP, RevealMode.HOLD_TO_REVEAL -> {
+                wordText.text = GameLogic.getWordForPlayer(currentPlayerIndex) ?: "Fehler: Kein Wort"
+            }
+            RevealMode.GRID_SELECTION -> {
+                currentPlayerText.text = "Karte für ${player.name} auswählen"
+            }
         }
     }
+
 
     //Handles the passing on of the phone further
     private fun nextPlayer() {
         if (flippedOnce == 1) {
-            flippedOnce = 0
             currentPlayerIndex++
+            flippedOnce = 0
             updateCurrentPlayer()
         } else {
-            Toast.makeText(requireContext(),"Schaue dir zuerst das Wort an ;)", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "Schaue dir zuerst das Wort an ;)" , Toast.LENGTH_SHORT).show()
         }
-
     }
 
     //Shows the starting and rotation info
@@ -528,6 +647,9 @@ class GameFragment : Fragment() {
         chanceNone.setText(prefs.getInt("chance_no_impostor", 1).toString())
         chanceJester.setText(prefs.getInt("chance_jester", 1).toString())
 
+        val spinnerReveal = dialogView.findViewById<Spinner>(R.id.spinnerRevealMode)
+        spinnerReveal.setSelection(prefs.getInt("reveal_mode", 0))
+
         val dialog = AlertDialog.Builder(requireContext(), R.style.PixelDialog)
             .setView(dialogView)
             .create()
@@ -536,7 +658,10 @@ class GameFragment : Fragment() {
             prefs.edit {
                 putInt("chance_all_impostor", chanceAll.text.toString().toIntOrNull() ?: 0)
                 putInt("chance_no_impostor", chanceNone.text.toString().toIntOrNull() ?: 0)
-                putInt("chance_jester", chanceJester.text.toString().toIntOrNull() ?: 0)            }
+                putInt("chance_jester", chanceJester.text.toString().toIntOrNull() ?: 0)
+            }
+
+            prefs.edit { putInt("reveal_mode", spinnerReveal.selectedItemPosition) }
 
             GameLogic.chanceNoImpostor = prefs.getInt("chance_no_impostor", 1)
             GameLogic.chanceAllImpostor = prefs.getInt("chance_all_impostor", 1)
