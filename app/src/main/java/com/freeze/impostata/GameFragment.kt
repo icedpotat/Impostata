@@ -81,9 +81,7 @@ class GameFragment : Fragment() {
     private val cardToPlayerMap = mutableMapOf<Int, Int>()  // cardIndex -> playerIndex
     private var currentGridSelectIndex = 0
 
-
-    //TODO: Deprecated members
-
+    
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         //Define all views and listeners
         val view = inflater.inflate(R.layout.fragment_game, container, false)
@@ -459,8 +457,8 @@ class GameFragment : Fragment() {
                 val playerIndex = currentGridSelectIndex
 
                 players[playerIndex].role = role
-                players[playerIndex].originalRole = role // ✅ Add this line
-                cardLabel.text = players[playerIndex].name
+                players[playerIndex].originalRole = role
+                card.setBackgroundResource(R.drawable.ic_cross)
                 cardToPlayerMap[i] = playerIndex
                 card.isEnabled = false
 
@@ -471,8 +469,7 @@ class GameFragment : Fragment() {
                     playerLabel.text = "Karte wählen für: ${players[currentGridSelectIndex].name}"
                 } else {
                     playerLabel.text = "Alle Karten wurden verteilt."
-                    currentPlayerIndex = currentGridSelectIndex
-                    btnNextPlayer.visibility = View.VISIBLE
+                    btnNextPlayer.text = "Spiel starten"
                 }
             }
 
@@ -489,22 +486,27 @@ class GameFragment : Fragment() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_card_reveal, null)
         val nameText = dialogView.findViewById<TextView>(R.id.DrevealName)
         val wordText = dialogView.findViewById<TextView>(R.id.DrevealWord)
-        val roleText = dialogView.findViewById<TextView>(R.id.DrevealRole)
 
         val player = players[playerIndex]
         nameText.text = player.name
-        roleText.text = player.role.toString()
         wordText.text = GameLogic.getWordForPlayer(playerIndex) ?: "Kein Wort"
 
-        AlertDialog.Builder(requireContext(), R.style.PixelDialog)
+        val dialog = AlertDialog.Builder(requireContext(), R.style.PixelDialog)
             .setView(dialogView)
             .setCancelable(false)
-            .setPositiveButton("OK") { dialog, _ ->
-                revealedCardIndices.add(playerIndex)
-                flippedOnce = 1
-                dialog.dismiss()
+            .create()
+
+        dialogView.findViewById<Button>(R.id.btnRevealClose).setOnClickListener {
+            revealedCardIndices.add(playerIndex)
+            flippedOnce = 1
+            currentPlayerIndex++
+            if (currentGridSelectIndex >= players.size) {
+                startVoting()
             }
-            .show()
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
 
@@ -559,8 +561,9 @@ class GameFragment : Fragment() {
                     view?.findViewById<View>(R.id.cardFront)?.visibility = View.VISIBLE
                     view?.findViewById<View>(R.id.cardBack)?.visibility = View.GONE
                 }
+
                 RevealMode.GRID_SELECTION -> {
-                    // Nothing, dialog already shown.
+
                 }
             }
             currentPlayerIndex++

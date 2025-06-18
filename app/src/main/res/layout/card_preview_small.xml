@@ -13,5 +13,6 @@
         android:textColor="@color/pixel_text"
         android:layout_gravity="center"
         android:textSize="20sp"
-        android:fontFamily="@font/pixel_font"/>
+        android:fontFamily="@font/pixel_font"
+        />
 </FrameLayout>

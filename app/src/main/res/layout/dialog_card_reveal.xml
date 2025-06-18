@@ -3,7 +3,8 @@
     android:layout_height="wrap_content"
     android:background="@drawable/pixel_panel"
     android:padding="16dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:gravity="center">
 
     <TextView
         android:id="@+id/DrevealName"
@@ -11,17 +12,9 @@
         android:layout_height="wrap_content"
         android:text="Spielername"
         android:textSize="18sp"
-        android:textColor="@color/pixel_text"
+        android:textColor="@color/pixel_yellow"
         android:fontFamily="@font/pixel_font" />
 
-    <TextView
-        android:id="@+id/DrevealRole"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Rolle"
-        android:textColor="@color/pixel_yellow"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/pixel_font" />
 
     <TextView
         android:id="@+id/DrevealWord"
@@ -32,4 +25,11 @@
         android:layout_marginTop="4dp"
         android:fontFamily="@font/pixel_font" />
 
+    <Button
+        android:id="@+id/btnRevealClose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="OK"
+        style="@style/PixelButton" />
 </LinearLayout>
