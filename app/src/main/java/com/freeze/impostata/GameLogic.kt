@@ -109,22 +109,17 @@ object GameLogic {
             Player(name.trim().ifEmpty { "Spieler ${index + 1}" })
         }.toMutableList()
 
-        val availablePairs = if (wordPairs.isEmpty()) {
-            wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
-            wordPairs
-        } else wordPairs
+        val selected = if (wordPairs.isNotEmpty()) {
+            wordPairs.removeAt(Random.nextInt(wordPairs.size)).also { usedWordPairs.add(it) }
+        } else WordPair("Fehler", "Fehler") // fallback
 
         gridAssignedPairs = buildList {
             repeat(impostorCount) { add(Role.IMPOSTOR to null) }
-            repeat(undercoverCount) {
-                val word = availablePairs.random().undercoverWord
-                add(Role.UNDERCOVER to word)
-            }
-            repeat(players.size - impostorCount - undercoverCount) {
-                val word = availablePairs.random().crewWord
-                add(Role.CREW to word)
-            }
+            repeat(undercoverCount) { add(Role.UNDERCOVER to selected.undercoverWord) }
+            repeat(players.size - impostorCount - undercoverCount) { add(Role.CREW to selected.crewWord) }
         }.shuffled().toMutableList()
+
+        selectedPair = selected
 
         startImpostors = impostorCount
         remainingImpostors = impostorCount
@@ -212,11 +207,16 @@ object GameLogic {
 
     fun resetGame() {
         players.clear()
+        gridAssignedPairs.clear()
         wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
         selectedPair = null
         remainingImpostors = 0
+        startImpostors = 0
         gameEnded = false
+        isCrewGame = false
+        isImpostorGame = false
     }
+
 
     fun addWordPair(crew: String, undercover: String) {
         customWordPairs.add(WordPair(crew.trim(), undercover.trim()))

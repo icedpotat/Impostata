@@ -34,56 +34,11 @@
             layout="@layout/reveal_hold"
             android:visibility="gone" />
 
-        <ViewStub
+        <include
             android:id="@+id/revealGrid"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout="@layout/reveal_grid_picker" />
+            layout="@layout/reveal_grid_picker"
+            android:visibility="gone" />
 
-
-    </FrameLayout>
-
-
-    <!-- Centered Card View -->
-    <FrameLayout
-        android:id="@+id/roleCardContainer"
-        android:layout_width="280dp"
-        android:layout_height="200dp"
-        android:layout_gravity="center"
-        android:layout_marginBottom="24dp">
-
-        <!-- Word displayed below -->
-        <TextView
-            android:id="@+id/wordText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:textColor="@color/pixel_text"
-            android:fontFamily="@font/pixel_font"
-            android:textSize="18sp"
-            android:padding="10dp"
-            android:background="@drawable/pixel_card_front" />
-
-        <!-- Cover card that slides -->
-        <LinearLayout
-            android:id="@+id/cardCover"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/pixel_card_back"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/cardTapText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Halte gedrückt, um das Wort zu sehen"
-                android:textColor="@color/pixel_text"
-                android:fontFamily="@font/pixel_font"
-                android:textSize="14sp"
-                android:gravity="center" />
-
-        </LinearLayout>
 
     </FrameLayout>
 
