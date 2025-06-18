@@ -34,7 +34,7 @@
         android:visibility="gone">
 
         <TextView
-            android:id="@+id/wordText"
+            android:id="@+id/wordTextHold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/pixel_text"

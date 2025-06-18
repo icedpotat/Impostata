@@ -1,27 +1,35 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:background="@drawable/pixel_panel"
     android:padding="16dp"
-    android:gravity="center">
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/DrevealName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Spielername"
+        android:textSize="18sp"
         android:textColor="@color/pixel_text"
-        android:textSize="16sp"
         android:fontFamily="@font/pixel_font" />
 
     <TextView
         android:id="@+id/DrevealRole"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Rolle Info"
+        android:text="Rolle"
         android:textColor="@color/pixel_yellow"
-        android:textSize="16sp"
-        android:fontFamily="@font/pixel_font"
-        android:paddingTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/pixel_font" />
+
+    <TextView
+        android:id="@+id/DrevealWord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Wort"
+        android:textColor="@color/pixel_text"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/pixel_font" />
+
 </LinearLayout>

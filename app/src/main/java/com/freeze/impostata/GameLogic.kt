@@ -102,6 +102,38 @@ object GameLogic {
         return true
     }
 
+    var gridAssignedPairs: MutableList<Pair<Role, String?>> = mutableListOf()
+
+    fun prepareRolesForGrid(playerNames: List<String>, undercoverCount: Int, impostorCount: Int) {
+        players = playerNames.mapIndexed { index, name ->
+            Player(name.trim().ifEmpty { "Spieler ${index + 1}" })
+        }.toMutableList()
+
+        val availablePairs = if (wordPairs.isEmpty()) {
+            wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
+            wordPairs
+        } else wordPairs
+
+        gridAssignedPairs = buildList {
+            repeat(impostorCount) { add(Role.IMPOSTOR to null) }
+            repeat(undercoverCount) {
+                val word = availablePairs.random().undercoverWord
+                add(Role.UNDERCOVER to word)
+            }
+            repeat(players.size - impostorCount - undercoverCount) {
+                val word = availablePairs.random().crewWord
+                add(Role.CREW to word)
+            }
+        }.shuffled().toMutableList()
+
+        startImpostors = impostorCount
+        remainingImpostors = impostorCount
+        gameEnded = false
+    }
+
+
+
+
     private fun assignRole(role: Role, count: Int) {
         val crewIndices = List(players.size) { i -> i }
             .filter { players[it].role == Role.CREW }

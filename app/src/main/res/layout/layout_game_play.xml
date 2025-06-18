@@ -34,10 +34,12 @@
             layout="@layout/reveal_hold"
             android:visibility="gone" />
 
-        <include
+        <ViewStub
             android:id="@+id/revealGrid"
-            layout="@layout/reveal_grid_picker"
-            android:visibility="gone" />
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout="@layout/reveal_grid_picker" />
+
 
     </FrameLayout>
 

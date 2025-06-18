@@ -1,10 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/cardGrid"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/revealGridScroll"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:columnCount="3"
-    android:padding="8dp"
-    android:alignmentMode="alignMargins"
-    android:useDefaultMargins="true">
-</GridLayout>
+    android:layout_height="150dp"
+    android:fillViewport="true"
+    android:padding="8dp">
+
+        <GridLayout
+            android:id="@+id/cardGrid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="3"
+            android:alignmentMode="alignMargins"
+            android:padding="8dp" />
+
+</ScrollView>
