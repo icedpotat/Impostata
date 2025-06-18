@@ -81,7 +81,7 @@ class GameFragment : Fragment() {
     private val cardToPlayerMap = mutableMapOf<Int, Int>()  // cardIndex -> playerIndex
     private var currentGridSelectIndex = 0
 
-    
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         //Define all views and listeners
         val view = inflater.inflate(R.layout.fragment_game, container, false)
@@ -346,6 +346,8 @@ class GameFragment : Fragment() {
                 gameLogic.prepareRolesForGrid(playerNames, undercoverCount, impostorCount)
             }
             else -> {
+                btnNextPlayer.visibility = View.VISIBLE
+                btnNextPlayer.text = "Weitergeben"
                 if (!gameLogic.setupGame(playerNames, undercoverCount, impostorCount)) {
                     Toast.makeText(requireContext(), "Zu viele Undercover/Impostor für diese Spieleranzahl.", Toast.LENGTH_SHORT).show()
                     return
