@@ -102,16 +102,64 @@ object GameLogic {
         return true
     }
 
-    private fun assignRole(role: Role, count: Int) {
-        var assigned = 0
-        while (assigned < count) {
-            val idx = Random.nextInt(players.size)
-            if (players[idx].role == Role.CREW) {
-                players[idx].role = role
-                assigned++
+    var gridAssignedPairs: MutableList<Pair<Role, String?>> = mutableListOf()
+
+    fun prepareRolesForGrid(playerNames: List<String>, undercoverCount: Int, impostorCount: Int) {
+        players = playerNames.mapIndexed { index, name ->
+            Player(name.trim().ifEmpty { "Spieler ${index + 1}" })
+        }.toMutableList()
+
+        if (wordPairs.isEmpty()) {
+            wordPairs = (wordPairsMaster + customWordPairs).filterNot { usedWordPairs.contains(it) }.toMutableList()
+            if (wordPairs.isEmpty()) {
+                usedWordPairs.clear()
+                wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
             }
         }
+
+
+        val selected = if (wordPairs.isNotEmpty()) {
+            wordPairs.removeAt(Random.nextInt(wordPairs.size)).also { usedWordPairs.add(it) }
+        } else WordPair("Fehler", "Fehler") // fallback
+
+        val assignedRoles = buildList {
+            repeat(impostorCount) { add(Role.IMPOSTOR) }
+            repeat(undercoverCount) { add(Role.UNDERCOVER) }
+            repeat(players.size - impostorCount - undercoverCount) { add(Role.CREW) }
+        }.shuffled()
+
+        gridAssignedPairs = assignedRoles.map { role ->
+            val word = when (role) {
+                Role.IMPOSTOR -> null
+                Role.UNDERCOVER -> selected.undercoverWord
+                Role.CREW -> selected.crewWord
+                else -> null
+            }
+            role to word
+        }.toMutableList()
+
+
+        selectedPair = selected
+
+        startImpostors = impostorCount
+        remainingImpostors = impostorCount
+        gameEnded = false
     }
+
+
+
+
+    private fun assignRole(role: Role, count: Int) {
+        val crewIndices = List(players.size) { i -> i }
+            .filter { players[it].role == Role.CREW }
+            .shuffled()
+            .take(count)
+
+        crewIndices.forEach { idx ->
+            players[idx].role = role
+        }
+    }
+
 
     private fun getRoleForPlayer(index: Int): Role? = players.getOrNull(index)?.role
 
@@ -119,7 +167,7 @@ object GameLogic {
         val jesterWord = selectedPair?.crewWord
         return when (getRoleForPlayer(index)) {
             Role.CREW -> selectedPair?.crewWord
-            Role.JESTER -> "Du bist Jester. Das Wort ist: $jesterWord"
+            Role.JESTER -> "Du bist Jester. Das Wort ist: \n$jesterWord"
             Role.UNDERCOVER -> selectedPair?.undercoverWord
             Role.IMPOSTOR -> "Du bist der Impostor."
             else -> null
@@ -133,7 +181,6 @@ object GameLogic {
             if (!it.isEjected) {
                 if (it.role == Role.JESTER && ejectedPlayers == 0) {
                     gameEnded = true
-                    // optionally: show jester win message
                 }
                 if (it.role == Role.IMPOSTOR) remainingImpostors--
                 it.role = Role.EJECTED
@@ -180,11 +227,16 @@ object GameLogic {
 
     fun resetGame() {
         players.clear()
+        gridAssignedPairs.clear()
         wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
         selectedPair = null
         remainingImpostors = 0
+        startImpostors = 0
         gameEnded = false
+        isCrewGame = false
+        isImpostorGame = false
     }
+
 
     fun addWordPair(crew: String, undercover: String) {
         customWordPairs.add(WordPair(crew.trim(), undercover.trim()))

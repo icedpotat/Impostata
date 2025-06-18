@@ -1,0 +1,17 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/revealGridScroll"
+    android:layout_width="match_parent"
+    android:layout_height="300dp"
+    android:fillViewport="true"
+    android:padding="8dp"
+    android:layout_gravity="center">
+
+        <GridLayout
+            android:id="@+id/cardGrid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="3"
+            android:alignmentMode="alignMargins"
+            android:padding="8dp" />
+
+</ScrollView>
