@@ -72,7 +72,6 @@ class GameFragment : Fragment() {
 
 
     private lateinit var btnSettings: ImageButton
-    private lateinit var spinner: Spinner
 
     private var selectedPlayerCount = 3
     private var currentPlayerIndex = 0
@@ -150,7 +149,6 @@ class GameFragment : Fragment() {
         remainingRoleLayout = view.findViewById(R.id.remainingRolesLayout)
 
         btnSettings = view.findViewById(R.id.settingsButton)
-        spinner = view.findViewById(R.id.spinnerRevealMode)
     }
 
     //Sets up all the listeners
@@ -313,6 +311,7 @@ class GameFragment : Fragment() {
     }
 
     //Reads the playernames from the view and prepares the game
+    @SuppressLint("SetTextI18n")
     private fun startGame() {
         val prefs = requireContext().getSharedPreferences("impostata_prefs", Context.MODE_PRIVATE)
         val modeOrdinal = prefs.getInt("reveal_mode", 0)
@@ -774,19 +773,30 @@ class GameFragment : Fragment() {
         chanceNone.setText(prefs.getInt("chance_no_impostor", 1).toString())
         chanceJester.setText(prefs.getInt("chance_jester", 1).toString())
 
-        val spinnerReveal = dialogView.findViewById<Spinner>(R.id.spinnerRevealMode)
-        spinnerReveal.setSelection(prefs.getInt("reveal_mode", 0))
+        val radioGroup = dialogView.findViewById<RadioGroup>(R.id.revealModeRadioGroup)
+        when (prefs.getInt("reveal_mode", 0)) {
+            0 -> radioGroup.check(R.id.radioClickFlip)
+            1 -> radioGroup.check(R.id.radioHoldReveal)
+            2 -> radioGroup.check(R.id.radioGridSelect)
+        }
 
         val dialog = AlertDialog.Builder(requireContext(), R.style.PixelDialog)
             .setView(dialogView)
             .create()
 
         dialogView.findViewById<Button>(R.id.btnAdd).setOnClickListener {
+            val mode = when (radioGroup.checkedRadioButtonId) {
+                R.id.radioClickFlip -> 0
+                R.id.radioHoldReveal -> 1
+                R.id.radioGridSelect -> 2
+                else -> 0
+            }
+
             prefs.edit {
                 putInt("chance_all_impostor", chanceAll.text.toString().toIntOrNull() ?: 0)
                 putInt("chance_no_impostor", chanceNone.text.toString().toIntOrNull() ?: 0)
                 putInt("chance_jester", chanceJester.text.toString().toIntOrNull() ?: 0)
-                putInt("reveal_mode", spinnerReveal.selectedItemPosition)
+                putInt("reveal_mode", mode)
             }
 
 

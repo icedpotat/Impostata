@@ -64,11 +64,36 @@
         android:fontFamily="@font/pixel_font"/>
 
     <!-- dialog_settings.xml -->
-    <Spinner
-        android:id="@+id/spinnerRevealMode"
+    <RadioGroup
+        android:id="@+id/revealModeRadioGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/reveal_modes" />
+        android:orientation="horizontal"
+        android:background="@drawable/bg_reveal_mode_selector"
+        android:padding="4dp"
+        android:layout_marginTop="12dp"
+        android:gravity="center">
+
+        <RadioButton
+            android:id="@+id/radioClickFlip"
+            style="@style/RevealOption"
+            android:text="Klick"
+            android:textSize="12sp"/>
+
+        <RadioButton
+            android:id="@+id/radioHoldReveal"
+            style="@style/RevealOption"
+            android:text="Halten"
+            android:textSize="12sp"/>
+
+        <RadioButton
+            android:id="@+id/radioGridSelect"
+            style="@style/RevealOption"
+            android:text="Wählen"
+            android:textSize="12sp"/>
+    </RadioGroup>
+
+
 
 
     <Button
