@@ -452,26 +452,29 @@ class GameFragment : Fragment() {
 
             card.setOnClickListener {
                 if (cardToPlayerMap.containsKey(i) || GameLogic.gridAssignedPairs.isEmpty()) return@setOnClickListener
+                card.animate().scaleX(1.1f).scaleY(1.1f).setDuration(100).withEndAction {
+                    card.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
 
-                flippedOnce = 1
-                val (role, _) = GameLogic.gridAssignedPairs.removeAt(0)
-                val playerIndex = currentGridSelectIndex
+                    flippedOnce = 1
+                    val (role, _) = GameLogic.gridAssignedPairs.removeAt(0)
+                    val playerIndex = currentGridSelectIndex
 
-                players[playerIndex].role = role
-                players[playerIndex].originalRole = role
-                card.setBackgroundResource(R.drawable.ic_cross)
-                cardToPlayerMap[i] = playerIndex
-                card.isEnabled = false
+                    players[playerIndex].role = role
+                    players[playerIndex].originalRole = role
+                    card.setBackgroundResource(R.drawable.ic_cross)
+                    cardToPlayerMap[i] = playerIndex
+                    card.isEnabled = false
 
-                showCardRevealDialog(playerIndex)
+                    showCardRevealDialog(playerIndex)
 
-                currentGridSelectIndex++
-                if (currentGridSelectIndex < players.size) {
-                    playerLabel.text = "Karte wählen für: ${players[currentGridSelectIndex].name}"
-                } else {
-                    playerLabel.text = "Alle Karten wurden verteilt."
-                    btnNextPlayer.text = "Spiel starten"
-                }
+                    currentGridSelectIndex++
+                    if (currentGridSelectIndex < players.size) {
+                        playerLabel.text = "Karte wählen für: ${players[currentGridSelectIndex].name}"
+                    } else {
+                        playerLabel.text = "Alle Karten wurden verteilt."
+                        btnNextPlayer.text = "Spiel starten"
+                    }
+                }.start()
             }
 
             grid.addView(card)
