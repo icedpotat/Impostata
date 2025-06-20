@@ -2,13 +2,18 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="220dp"
     android:layout_height="140dp"
-    android:layout_gravity="center">
+    android:layout_gravity="center"
+    android:descendantFocusability="blocksDescendants"
+    android:clickable="false"
+    android:focusable="false">
 
     <LinearLayout
         android:id="@+id/cardFront"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/pixel_card_back"
+        android:clickable="true"
+        android:focusable="true"
         android:gravity="center"
         android:orientation="vertical"
         android:padding="16dp">
@@ -35,7 +40,7 @@
         android:visibility="gone">
 
         <TextView
-            android:id="@+id/wordTextHold"
+            android:id="@+id/wordTextClick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/pixel_text"

@@ -26,12 +26,7 @@
 
         <include
             android:id="@+id/revealClickFlip"
-            layout="@layout/reveal_click_flip"
-            android:visibility="gone" />
-
-        <include
-            android:id="@+id/revealHold"
-            layout="@layout/reveal_hold"
+            layout="@layout/reveal_clickhold"
             android:visibility="gone" />
 
         <include

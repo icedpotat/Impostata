@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -17,6 +16,8 @@ import android.widget.*
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.freeze.impostata.model.Role
+import com.freeze.impostata.model.GamePhase
+import com.freeze.impostata.model.RevealMode
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -27,9 +28,6 @@ import com.freeze.impostata.GameLogic.players
 import androidx.core.view.isVisible
 
 class GameFragment : Fragment() {
-    private enum class GamePhase { SETUP, PLAYING, VOTING, RESULT }
-    enum class RevealMode { CLICK_TO_FLIP, HOLD_TO_REVEAL, GRID_SELECTION }
-
     private lateinit var gameLogic: GameLogic
 
     // Layout sections
@@ -103,11 +101,9 @@ class GameFragment : Fragment() {
 
     private fun setupFlipRevealUI(view: View) {
         val clickFlip = view.findViewById<View>(R.id.revealClickFlip)
-        val hold = view.findViewById<View>(R.id.revealHold)
         val grid = view.findViewById<View>(R.id.revealGrid)
 
         clickFlip?.visibility = View.GONE
-        hold?.visibility = View.GONE
         grid?.visibility = View.GONE
 
         view.findViewById<View>(R.id.cardFront)?.apply {
@@ -168,19 +164,27 @@ class GameFragment : Fragment() {
         }
 
         setGamePhase(GamePhase.PLAYING)
-
         when (revealMode) {
             RevealMode.CLICK_TO_FLIP -> {
-                requireView().findViewById<View>(R.id.revealClickFlip)?.apply {
-                    visibility = View.VISIBLE
-                    setupFlipListeners(this)
-                }
+                requireView().findViewById<View>(R.id.revealClickFlip)?.visibility = View.VISIBLE
+                RevealManager(
+                    rootView = requireView(),
+                    revealMode = revealMode,
+                    getCurrentPlayerIndex = { currentPlayerIndex },
+                    onWordRevealed = { flippedOnce = 1 }
+                ).setup()
+                btnNextPlayer.visibility = View.VISIBLE
             }
             RevealMode.HOLD_TO_REVEAL -> {
-                requireView().findViewById<View>(R.id.revealHold)?.apply {
-                    visibility = View.VISIBLE
-                    setupHoldListeners(this)
-                }
+
+                requireView().findViewById<View>(R.id.revealClickFlip)?.visibility = View.VISIBLE
+                RevealManager(
+                    rootView = requireView(),
+                    revealMode = revealMode,
+                    getCurrentPlayerIndex = { currentPlayerIndex },
+                    onWordRevealed = { flippedOnce = 1 }
+                ).setup()
+                btnNextPlayer.visibility = View.VISIBLE
             }
             RevealMode.GRID_SELECTION -> {
                 requireView().findViewById<View>(R.id.revealGrid)?.visibility = View.VISIBLE
@@ -191,11 +195,6 @@ class GameFragment : Fragment() {
         currentPlayerIndex = 0
         updateCurrentPlayer()
     }
-
-    // ... KEEP REST OF ORIGINAL CODE AS IS ...
-    // This update makes structure cleaner and more maintainable.
-    // Refactor next: setupCardGrid(), resolveVote(), extract Reveal UI logic
-
 
 
 //Define all views
@@ -233,7 +232,7 @@ class GameFragment : Fragment() {
         groupContainer = view.findViewById(R.id.selectedGroupContainer)
         btnSelectGroup = view.findViewById(R.id.btnSelectGroup)
         wordTextClick = view.findViewById(R.id.wordTextClick)
-        wordTextHold = view.findViewById(R.id.wordTextHold)
+        wordTextHold = view.findViewById(R.id.wordTextClick)
 
 
         btnRemainingInfo = view.findViewById(R.id.remainingRolesInfo)
@@ -372,47 +371,6 @@ class GameFragment : Fragment() {
         btnStartGame.visibility = View.VISIBLE
     }
 
-
-
-    private fun setupFlipListeners(view: View) {
-        val cardFront = view.findViewById<View>(R.id.cardFront)
-        val cardBack = view.findViewById<View>(R.id.cardBack)
-        cardFront.setOnClickListener {
-            Log.d("Flipper","CLICKED")
-            cardFront.visibility = View.GONE
-            cardBack.visibility = View.VISIBLE
-            flippedOnce = 1
-        }
-        cardBack.setOnClickListener {
-            cardBack.visibility = View.GONE
-            cardFront.visibility = View.VISIBLE
-        }
-    }
-
-    private fun setupHoldListeners(view: View) {
-        val cardFront = view.findViewById<View>(R.id.cardFront)
-        val cardBack = view.findViewById<View>(R.id.cardBack)
-
-        cardFront.setOnTouchListener { v, event ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    v.performClick() // ✅ Accessibility event for screen readers
-                    cardFront.visibility = View.GONE
-                    cardBack.visibility = View.VISIBLE
-                    flippedOnce = 1
-                    true
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    cardBack.visibility = View.GONE
-                    cardFront.visibility = View.VISIBLE
-                    true
-                }
-                else -> false
-            }
-        }
-    }
-
-
     @SuppressLint("SetTextI18n")
     private fun setupCardGrid() {
         val grid = requireView().findViewById<GridLayout>(R.id.cardGrid)
@@ -518,34 +476,21 @@ class GameFragment : Fragment() {
         currentPlayerText.text = "Gerät an: \n${player.name}"
 
         when (revealMode) {
-            RevealMode.CLICK_TO_FLIP -> {
-                wordTextClick.text = GameLogic.getWordForPlayer(currentPlayerIndex) ?: "Fehler: Kein Wort"
-                val clickFlip = view?.findViewById<View>(R.id.revealClickFlip)
-                clickFlip?.let {
-                    it.findViewById<View>(R.id.cardFront)?.visibility = View.VISIBLE
-                    it.findViewById<View>(R.id.cardBack)?.visibility = View.GONE
-                    setupFlipListeners(it)
-                }
-            }
-
-            RevealMode.HOLD_TO_REVEAL -> {
-                wordTextHold.text = GameLogic.getWordForPlayer(currentPlayerIndex) ?: "Fehler: Kein Wort"
-                val hold = view?.findViewById<View>(R.id.revealHold)
-                hold?.let {
-                    it.findViewById<View>(R.id.cardFront)?.visibility = View.VISIBLE
-                    it.findViewById<View>(R.id.cardBack)?.visibility = View.GONE
-                    setupHoldListeners(it)
-                }
+            RevealMode.CLICK_TO_FLIP, RevealMode.HOLD_TO_REVEAL -> {
+                RevealManager(
+                    rootView = requireView(),
+                    revealMode = revealMode,
+                    getCurrentPlayerIndex = { currentPlayerIndex },
+                    onWordRevealed = { flippedOnce = 1 }
+                ).setup()
             }
 
             RevealMode.GRID_SELECTION -> {
-                // Don't show word here, it's assigned on card click
                 currentPlayerText.text = "Karte für ${player.name} auswählen"
                 btnNextPlayer.visibility = if (currentGridSelectIndex >= players.size) View.VISIBLE else View.GONE
             }
         }
     }
-
 
     //Handles the passing on of the phone further
     private fun nextPlayer() {
@@ -643,7 +588,7 @@ class GameFragment : Fragment() {
 
         val playerName = gameLogic.players[index].name
         voteResultText.text = "$playerName wurde rausgeworfen.\n\nRolle: $role"
-        val ejectedPlayers = players.count { !it.isEjected }
+        val ejectedPlayers = players.count { it.isEjected }
 
 
         if (role == Role.IMPOSTOR) {
@@ -707,19 +652,9 @@ class GameFragment : Fragment() {
         val modeOrdinal = prefs.getInt("reveal_mode", 0)
         revealMode = RevealMode.entries[modeOrdinal]
         val clickFlip = view?.findViewById<View>(R.id.revealClickFlip)
-        val hold = view?.findViewById<View>(R.id.revealHold)
         clickFlip?.let {
             it.findViewById<View>(R.id.cardFront)?.visibility = View.VISIBLE
-            it.findViewById<View>(R.id.cardBack)?.visibility = View.GONE
-            setupFlipListeners(it)
-        }
-        hold?.let {
-            it.findViewById<View>(R.id.cardFront)?.visibility = View.VISIBLE
-            it.findViewById<View>(R.id.cardBack)?.visibility = View.GONE
-            setupHoldListeners(it)
-        }
-
-
+            it.findViewById<View>(R.id.cardBack)?.visibility = View.GONE }
     }
 
 
