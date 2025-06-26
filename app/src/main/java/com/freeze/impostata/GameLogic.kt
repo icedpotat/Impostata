@@ -68,18 +68,43 @@ object GameLogic {
         return true
     }
 
-    fun prepareRolesForGrid(playerNames: List<String>, undercoverCount: Int, impostorCount: Int) {
+    fun prepareRolesForGrid(playerNames: List<String>, undercoverCount: Int, impostorCountOriginal: Int) {
         session = GameSession()
+        val playerCount = playerNames.size
+        var impostorCount = impostorCountOriginal
+
         session.players = playerNames.mapIndexed { i, name ->
             Player(name.trim().ifEmpty { "Spieler ${i + 1}" })
         }.toMutableList()
 
+        // Determine chaos mode like setupGame()
+        val chaosRoll = Random.nextInt(100)
+        Log.d("GridMode", "Roll=$chaosRoll, NoImpChance=$chanceNoImpostor, AllImpChance=$chanceAllImpostor")
+
+        if (chaosRoll < chanceNoImpostor) {
+            impostorCount = 0
+            session.isCrewGame = true
+        }
+
+        if (chaosRoll in chanceNoImpostor until (chanceNoImpostor + chanceAllImpostor)) {
+            session.gridAssignedPairs = List(playerCount) {
+                Role.IMPOSTOR to null
+            }.shuffled().toMutableList()
+
+            session.selectedPair = wordRepository.nextWordPair()
+            session.startImpostors = playerCount
+            session.remainingImpostors = playerCount
+            session.isImpostorGame = true
+            return
+        }
+
+        // Proceed as usual otherwise
         val selected = wordRepository.nextWordPair()
 
         val roles = buildList {
             repeat(impostorCount) { add(Role.IMPOSTOR) }
             repeat(undercoverCount) { add(Role.UNDERCOVER) }
-            repeat(session.players.size - impostorCount - undercoverCount) { add(Role.CREW) }
+            repeat(playerCount - impostorCount - undercoverCount) { add(Role.CREW) }
         }.toMutableList()
 
         if (roles.count { it == Role.CREW } > 0 && Random.nextInt(100) < chanceJester) {
