@@ -13,10 +13,12 @@
         android:theme="@style/Theme.Impostata"
         tools:targetApi="31">
         <activity android:name=".GroupActivity"
+            android:theme="@style/Theme.Impostata"
             android:windowSoftInputMode="adjustResize"
             />
         <activity
             android:name=".MainActivity"
+            android:theme="@style/Theme.Impostata"
             android:exported="true"
             android:windowSoftInputMode="adjustResize"
             >
