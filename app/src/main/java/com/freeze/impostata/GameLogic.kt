@@ -18,6 +18,8 @@ object GameLogic {
     var chanceAllImpostor = 1
     var chanceJester = 1
 
+    var chanceOneCrew = 1
+
     val players get() = session.players
     val gridAssignedPairs get() = session.gridAssignedPairs
 
@@ -37,20 +39,28 @@ object GameLogic {
             Player(name.trim().ifEmpty { "Spieler ${i + 1}" })
         }.toMutableList()
 
+
         val chaosRoll = Random.nextInt(100)
-        Log.d("GameMode", "Roll=$chaosRoll, NoImpChance=$chanceNoImpostor, AllImpChance=$chanceAllImpostor")
+        Log.d("GameMode", "Roll=$chaosRoll")
 
-        if (chaosRoll < chanceNoImpostor) {
-            impostorCount = 0
-            session.isCrewGame = true
-        }
-
-        if (chaosRoll in chanceNoImpostor until (chanceNoImpostor + chanceAllImpostor)) {
-            session.players.forEach { it.role = Role.IMPOSTOR }
-            session.remainingImpostors = session.players.size
-            session.startImpostors = session.players.size
-            session.isImpostorGame = true
-            return true
+        when {
+            chaosRoll < chanceNoImpostor -> {
+                // No impostors
+                impostorCount = 0
+                session.isCrewGame = true
+            }
+            chaosRoll < chanceNoImpostor + chanceAllImpostor -> {
+                // All impostors
+                session.players.forEach { it.role = Role.IMPOSTOR }
+                session.remainingImpostors = session.players.size
+                session.startImpostors = session.players.size
+                session.isImpostorGame = true
+                return true
+            }
+            chaosRoll < chanceNoImpostor + chanceAllImpostor + chanceOneCrew -> {
+                // One crew mode
+                impostorCount = Random.nextInt(1, playerNames.size - 1)
+            }
         }
 
         session.selectedPair = wordRepository.nextWordPair()
@@ -79,24 +89,37 @@ object GameLogic {
 
         // Determine chaos mode like setupGame()
         val chaosRoll = Random.nextInt(100)
-        Log.d("GridMode", "Roll=$chaosRoll, NoImpChance=$chanceNoImpostor, AllImpChance=$chanceAllImpostor")
+        Log.d(
+            "GridMode",
+            "Roll=$chaosRoll, NoImp=$chanceNoImpostor, AllImp=$chanceAllImpostor, OneCrew=$chanceOneCrew"
+        )
 
-        if (chaosRoll < chanceNoImpostor) {
-            impostorCount = 0
-            session.isCrewGame = true
+        when {
+            chaosRoll < chanceNoImpostor -> {
+                // No impostors
+                impostorCount = 0
+                session.isCrewGame = true
+            }
+
+            chaosRoll < chanceNoImpostor + chanceAllImpostor -> {
+                // All impostors
+                session.gridAssignedPairs = List(playerCount) {
+                    Role.IMPOSTOR to null
+                }.shuffled().toMutableList()
+
+                session.selectedPair = wordRepository.nextWordPair()
+                session.startImpostors = playerCount
+                session.remainingImpostors = playerCount
+                session.isImpostorGame = true
+                return
+            }
+
+            chaosRoll < chanceNoImpostor + chanceAllImpostor + chanceOneCrew -> {
+                // One crew mode
+                impostorCount = playerNames.size - Random.nextInt(2, playerNames.size)
+            }
         }
 
-        if (chaosRoll in chanceNoImpostor until (chanceNoImpostor + chanceAllImpostor)) {
-            session.gridAssignedPairs = List(playerCount) {
-                Role.IMPOSTOR to null
-            }.shuffled().toMutableList()
-
-            session.selectedPair = wordRepository.nextWordPair()
-            session.startImpostors = playerCount
-            session.remainingImpostors = playerCount
-            session.isImpostorGame = true
-            return
-        }
 
         // Proceed as usual otherwise
         val selected = wordRepository.nextWordPair()

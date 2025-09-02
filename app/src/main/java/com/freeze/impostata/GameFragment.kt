@@ -26,6 +26,7 @@ import androidx.core.content.edit
 import androidx.core.content.res.ResourcesCompat
 import com.freeze.impostata.GameLogic.players
 import androidx.core.view.isVisible
+import androidx.transition.Visibility
 
 class GameFragment : Fragment() {
     private lateinit var gameLogic: GameLogic
@@ -640,6 +641,7 @@ class GameFragment : Fragment() {
         gameLogic.resetGame()
         revealedCardIndices.clear()
         cardToPlayerMap.clear()
+        remainingRoleLayout.visibility = View.GONE
         currentGridSelectIndex = 0
 
         view?.findViewById<GridLayout>(R.id.cardGrid)?.removeAllViews()
