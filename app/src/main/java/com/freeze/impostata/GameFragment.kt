@@ -97,7 +97,12 @@ class GameFragment : Fragment() {
         GameLogic.chanceAllImpostor = prefs.getInt("chance_all_impostor", 1)
         GameLogic.chanceNoImpostor = prefs.getInt("chance_no_impostor", 1)
         GameLogic.chanceJester = prefs.getInt("chance_jester", 1)
-        revealMode = RevealMode.entries[prefs.getInt("reveal_mode", 0)]
+        GameLogic.chanceOneCrew = prefs.getInt("chance_one_crew", 1)
+        revealMode = RevealMode.entries.getOrElse(prefs.getInt("reveal_mode", 0)) { RevealMode.CLICK_TO_FLIP }
+        // Custom words imported earlier are kept across app restarts
+        prefs.getString("custom_words", null)?.lineSequence()?.forEach { line ->
+            GameLogic.parsePairLine(line)?.let { GameLogic.addWordPair(it.first, it.second) }
+        }
     }
 
     private fun setupFlipRevealUI(view: View) {
@@ -155,14 +160,18 @@ class GameFragment : Fragment() {
 
         val (undercoverCount, impostorCount, _) = getRoleCounts()
 
-        if (revealMode == RevealMode.GRID_SELECTION) {
+        val ok = if (revealMode == RevealMode.GRID_SELECTION) {
             gameLogic.prepareRolesForGrid(playerNames, undercoverCount, impostorCount)
         } else {
-            if (!gameLogic.setupGame(playerNames, undercoverCount, impostorCount)) {
-                Toast.makeText(requireContext(), "Zu viele Undercover/Impostor für diese Spieleranzahl.", Toast.LENGTH_SHORT).show()
-                return
-            }
+            gameLogic.setupGame(playerNames, undercoverCount, impostorCount)
         }
+        if (!ok) {
+            Toast.makeText(requireContext(), "Zu viele Undercover/Impostor für diese Spieleranzahl.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        flippedOnce = 0
+        btnNextPlayer.text = getString(R.string.next_player)
 
         setGamePhase(GamePhase.PLAYING)
         when (revealMode) {
@@ -381,7 +390,7 @@ class GameFragment : Fragment() {
 
         if (GameLogic.gridAssignedPairs.size != players.size) {
             // Rebuild roles only if needed
-            GameLogic.prepareRolesForGrid(players.map { it.name }, undercoverCount, impostorCount)
+            if (!GameLogic.prepareRolesForGrid(players.map { it.name }, undercoverCount, impostorCount)) return
         }
 
 
@@ -589,17 +598,21 @@ class GameFragment : Fragment() {
 
         val playerName = gameLogic.players[index].name
         voteResultText.text = "$playerName wurde rausgeworfen.\n\nRolle: $role"
-        val ejectedPlayers = players.count { it.isEjected }
+        // The Jester only wins if they are the first player voted out
+        val firstEjection = gameLogic.wasFirstEjection()
+        btnRestartGame.visibility = View.GONE
 
 
         if (role == Role.IMPOSTOR) {
             impostorGuessLayout.visibility = View.VISIBLE
             btnContinueVoting.visibility = View.GONE
             btnConfirmGuess.visibility = View.VISIBLE
-        } else if (role == Role.JESTER && ejectedPlayers == 0) {
+        } else if (role == Role.JESTER && firstEjection) {
             voteResultText.append("\n\nDer Jester wurde erfolgreich rausgeworfen! Er gewinnt alleine.")
+            impostorGuessLayout.visibility = View.GONE
             btnContinueVoting.visibility = View.GONE
             btnRestartGame.visibility = View.VISIBLE
+            showGameEndDialog()
             return
         } else {
             impostorGuessLayout.visibility = View.GONE
@@ -648,11 +661,14 @@ class GameFragment : Fragment() {
         view?.findViewById<TextView>(R.id.currentPlayerText)?.text = ""
 
         btnRestartGame.visibility = View.GONE
+        btnNextPlayer.text = getString(R.string.next_player)
+        flippedOnce = 0
+        currentPlayerIndex = 0
         setGamePhase(GamePhase.SETUP)
         impostorGuessInput.setText("")
         val prefs = requireContext().getSharedPreferences("impostata_prefs", Context.MODE_PRIVATE)
         val modeOrdinal = prefs.getInt("reveal_mode", 0)
-        revealMode = RevealMode.entries[modeOrdinal]
+        revealMode = RevealMode.entries.getOrElse(modeOrdinal) { RevealMode.CLICK_TO_FLIP }
         val clickFlip = view?.findViewById<View>(R.id.revealClickFlip)
         clickFlip?.let {
             it.findViewById<View>(R.id.cardFront)?.visibility = View.VISIBLE
@@ -781,13 +797,22 @@ class GameFragment : Fragment() {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
-                requireContext().contentResolver.openInputStream(uri)?.bufferedReader()?.forEachLine { line ->
-                    val parts = line.split(",")
-                    if (parts.size == 2) {
-                        GameLogic.addWordPair(parts[0].trim(), parts[1].trim())
+                val added = mutableListOf<String>()
+                try {
+                    requireContext().contentResolver.openInputStream(uri)?.bufferedReader()?.useLines { lines ->
+                        lines.forEach { line ->
+                            val pair = GameLogic.parsePairLine(line) ?: return@forEach
+                            if (GameLogic.addWordPair(pair.first, pair.second)) added += "${pair.first},${pair.second}"
+                        }
                     }
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Datei konnte nicht gelesen werden.", Toast.LENGTH_SHORT).show()
+                    return@let
                 }
-                Toast.makeText(requireContext(), "Wörter erfolgreich importiert.", Toast.LENGTH_SHORT).show()
+                val prefs = requireContext().getSharedPreferences("impostata_prefs", Context.MODE_PRIVATE)
+                val existing = prefs.getString("custom_words", "").orEmpty()
+                prefs.edit { putString("custom_words", (existing.lines() + added).filter { it.isNotBlank() }.joinToString("\n")) }
+                Toast.makeText(requireContext(), "${added.size} Wortpaare importiert.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -826,8 +851,9 @@ class GameFragment : Fragment() {
             btnStartGame.visibility = View.VISIBLE
         }
     }
-    override fun onResume() {
-        super.onResume()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        // Registered once per view (previously added again on every onResume)
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 // If not in setup phase, reset game
