@@ -97,3 +97,7 @@ app/src/main/
 ```
 
 Contributions are welcome. New word pairs (one `crew,undercover` per line in `word_pairs.txt`) are the easiest place to start.
+
+## License
+
+[MIT](LICENSE). The *Press Start 2P* font is licensed separately under the SIL Open Font License 1.1.
