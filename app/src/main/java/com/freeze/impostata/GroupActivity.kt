@@ -43,7 +43,6 @@ class GroupActivity : AppCompatActivity() {
         supportActionBar?.hide()
 
         groups = loadGroups(this)
-        displayGroups(findViewById(R.id.groupListContainer))
 
         val container = findViewById<LinearLayout>(R.id.groupListContainer)
         displayGroups(container)
@@ -166,7 +165,7 @@ class GroupActivity : AppCompatActivity() {
                 }
                 .filter { it.isNotEmpty() }
 
-            if (groupName.isNotEmpty() && !playerNames.none()) {
+            if (groupName.isNotEmpty() && playerNames.count() >= 3) {
                 val group = Group(
                     name = groupName,
                     colorHex = initialGroup?.colorHex ?: getRandomColorHex(),
@@ -175,7 +174,7 @@ class GroupActivity : AppCompatActivity() {
                 onSave(group)
                 dialog.dismiss()
             } else {
-                Toast.makeText(this, "Bitte Gruppennamen und Spieler eingeben", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bitte Gruppennamen und mindestens 3 Spieler eingeben", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -249,9 +248,12 @@ class GroupActivity : AppCompatActivity() {
     fun loadGroups(context: Context): MutableList<Group> {
         val prefs = context.getSharedPreferences("impostata_prefs", Context.MODE_PRIVATE)
         val json = prefs.getString("groups_json", null) ?: return mutableListOf()
-        val gson = Gson()
         val type = com.google.gson.reflect.TypeToken.getParameterized(MutableList::class.java, Group::class.java).type
-        return gson.fromJson(json, type)
+        return try {
+            Gson().fromJson<MutableList<Group>>(json, type) ?: mutableListOf()
+        } catch (e: Exception) {
+            mutableListOf()
+        }
     }
 
     private fun selectGroup(group: Group) {

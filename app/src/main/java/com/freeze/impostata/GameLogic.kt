@@ -30,10 +30,12 @@ object GameLogic {
     val gameEnded: Boolean
         get() = session.gameEnded
 
-    fun setupGame(playerNames: List<String>, undercoverCount: Int, impostorCountOriginal: Int): Boolean {
+    fun setupGame(playerNames: List<String>, undercoverCountOriginal: Int, impostorCountOriginal: Int): Boolean {
         session = GameSession()
         var impostorCount = impostorCountOriginal
-        if (undercoverCount + impostorCount >= playerNames.size) return false
+        var undercoverCount = undercoverCountOriginal
+        var allowJester = true
+        if (playerNames.size < 3 || undercoverCount + impostorCount >= playerNames.size) return false
 
         session.players = playerNames.mapIndexed { i, name ->
             Player(name.trim().ifEmpty { "Spieler ${i + 1}" })
@@ -51,15 +53,18 @@ object GameLogic {
             }
             chaosRoll < chanceNoImpostor + chanceAllImpostor -> {
                 // All impostors
-                session.players.forEach { it.role = Role.IMPOSTOR }
+                session.selectedPair = wordRepository.nextWordPair()
+                session.players.forEach { it.role = Role.IMPOSTOR; it.originalRole = Role.IMPOSTOR }
                 session.remainingImpostors = session.players.size
                 session.startImpostors = session.players.size
                 session.isImpostorGame = true
                 return true
             }
             chaosRoll < chanceNoImpostor + chanceAllImpostor + chanceOneCrew -> {
-                // One crew mode
-                impostorCount = Random.nextInt(1, playerNames.size - 1)
+                // One crew mode: a single crew member, everyone else is an impostor
+                impostorCount = playerNames.size - 1
+                undercoverCount = 0
+                allowJester = false
             }
         }
 
@@ -68,7 +73,7 @@ object GameLogic {
         session.players.forEach { it.role = Role.CREW }
         roleAssigner.assign(session.players, Role.UNDERCOVER, undercoverCount)
         roleAssigner.assign(session.players, Role.IMPOSTOR, impostorCount)
-        if (session.players.count { it.role == Role.CREW } > 0 && Random.nextInt(100) < chanceJester) {
+        if (allowJester && session.players.count { it.role == Role.CREW } > 1 && Random.nextInt(100) < chanceJester) {
             roleAssigner.assign(session.players, Role.JESTER, 1)
         }
 
@@ -78,10 +83,13 @@ object GameLogic {
         return true
     }
 
-    fun prepareRolesForGrid(playerNames: List<String>, undercoverCount: Int, impostorCountOriginal: Int) {
+    fun prepareRolesForGrid(playerNames: List<String>, undercoverCountOriginal: Int, impostorCountOriginal: Int): Boolean {
         session = GameSession()
         val playerCount = playerNames.size
         var impostorCount = impostorCountOriginal
+        var undercoverCount = undercoverCountOriginal
+        var allowJester = true
+        if (playerCount < 3 || undercoverCount + impostorCount >= playerCount) return false
 
         session.players = playerNames.mapIndexed { i, name ->
             Player(name.trim().ifEmpty { "Spieler ${i + 1}" })
@@ -111,12 +119,14 @@ object GameLogic {
                 session.startImpostors = playerCount
                 session.remainingImpostors = playerCount
                 session.isImpostorGame = true
-                return
+                return true
             }
 
             chaosRoll < chanceNoImpostor + chanceAllImpostor + chanceOneCrew -> {
-                // One crew mode
-                impostorCount = playerNames.size - Random.nextInt(2, playerNames.size)
+                // One crew mode: a single crew member, everyone else is an impostor
+                impostorCount = playerCount - 1
+                undercoverCount = 0
+                allowJester = false
             }
         }
 
@@ -130,7 +140,7 @@ object GameLogic {
             repeat(playerCount - impostorCount - undercoverCount) { add(Role.CREW) }
         }.toMutableList()
 
-        if (roles.count { it == Role.CREW } > 0 && Random.nextInt(100) < chanceJester) {
+        if (allowJester && roles.count { it == Role.CREW } > 1 && Random.nextInt(100) < chanceJester) {
             val crewIndices = roles.withIndex().filter { it.value == Role.CREW }.map { it.index }
             if (crewIndices.isNotEmpty()) {
                 val jesterIndex = crewIndices.random()
@@ -151,6 +161,7 @@ object GameLogic {
         session.selectedPair = selected
         session.startImpostors = roles.count { it == Role.IMPOSTOR }
         session.remainingImpostors = session.startImpostors
+        return true
     }
 
     fun getWordForPlayer(index: Int): String? {
@@ -177,7 +188,8 @@ object GameLogic {
     }
 
     fun checkImpostorGuessAndEndGame(guess: String): Boolean {
-        val correct = guess.trim().lowercase() == session.selectedPair?.crewWord?.lowercase()
+        val target = session.selectedPair?.crewWord?.trim()?.lowercase() ?: return false
+        val correct = guess.trim().lowercase() == target
         if (correct) session.gameEnded = true
         return correct
     }
@@ -185,7 +197,19 @@ object GameLogic {
     fun getRemainingRoleCount(role: Role): Int =
         session.players.count { !it.isEjected && it.role == role }
 
-    fun isGameOver(): Boolean = !session.isCrewGame && session.remainingImpostors == 0 || session.gameEnded
+    fun isGameOver(): Boolean {
+        if (session.gameEnded) return true
+        val active = session.players.count { !it.isEjected }
+        return when {
+            // Nobody to find: end once only two players are left
+            session.isCrewGame -> active <= 2
+            session.startImpostors > 0 -> session.remainingImpostors == 0
+            // Undercover-only game: ends when every undercover is out
+            else -> getRemainingRoleCount(Role.UNDERCOVER) == 0
+        }
+    }
+
+    fun wasFirstEjection(): Boolean = session.players.count { it.isEjected } == 1
 
     fun getGameSummary(): String {
         val grouped = session.players.groupBy { it.originalRole }
@@ -203,11 +227,18 @@ object GameLogic {
 
     fun resetGame() {
         session = GameSession()
-        wordRepository.reset()
     }
 
-    fun addWordPair(crew: String, undercover: String) {
-        wordRepository.addCustomPair(WordPair(crew.trim(), undercover.trim()))
+    fun addWordPair(crew: String, undercover: String): Boolean {
+        val c = crew.trim(); val u = undercover.trim()
+        if (c.isEmpty() || u.isEmpty()) return false
+        return wordRepository.addCustomPair(WordPair(c, u))
+    }
+
+    /** Parses one "crew,undercover" (or ";"-separated) line. */
+    fun parsePairLine(line: String): Pair<String, String>? {
+        val parts = line.split(',', ';').map { it.trim().trim('"') }
+        return if (parts.size == 2 && parts[0].isNotEmpty() && parts[1].isNotEmpty()) parts[0] to parts[1] else null
     }
 }
 
@@ -233,10 +264,7 @@ class WordRepository {
             wordPairsMaster += context.assets.open("word_pairs.txt")
                 .bufferedReader()
                 .lineSequence()
-                .mapNotNull { line ->
-                    val parts = line.split(',')
-                    if (parts.size == 2) WordPair(parts[0].trim(), parts[1].trim()) else null
-                }
+                .mapNotNull { line -> GameLogic.parsePairLine(line)?.let { WordPair(it.first, it.second) } }
                 .toList()
         }
         reset()
@@ -254,9 +282,11 @@ class WordRepository {
         wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
     }
 
-    fun addCustomPair(pair: WordPair) {
+    fun addCustomPair(pair: WordPair): Boolean {
+        if (pair in customWordPairs || pair in wordPairsMaster) return false
         customWordPairs.add(pair)
-        wordPairs = (wordPairsMaster + customWordPairs).toMutableList()
+        wordPairs.add(pair)
+        return true
     }
 }
 
